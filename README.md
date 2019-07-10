@@ -1,2 +1,4 @@
 README
-# booker_client
+# booker_gfl
+
+Final work to GeeksForLess

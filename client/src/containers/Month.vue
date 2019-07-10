@@ -2,11 +2,11 @@
   <div>
     <div class="calendar__wrapper">
       <div class="calendar__top">
-        <span class="calendar__prev" @click="slideMonth(false)">Туда</span>
+        <b-button class="calendar__prev calendar__btn" variant="outline-info" @click="slideMonth(false)"><font-awesome-icon icon='chevron-left'/></b-button>
         <span class="calendar__mouth">{{currentMonthName()}} {{ getYear }}</span>
-        <span class="calendar__next" @click="slideMonth(true)">Сюда</span>
+        <b-button class="calendar__next calendar__btn" variant="outline-info" @click="slideMonth(true)"><font-awesome-icon icon='chevron-right'/></b-button>
       </div>
-      <table class="calendar">
+      <table class="calendar" border="1">
         <thead>
           <tr>
             <DaysOfWeek v-for='(item, index) in daysName' :item='item' :key='index'></DaysOfWeek>
@@ -165,5 +165,25 @@ export default {
 </script>
 
 <style>
-
+  .calendar__wrapper {
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .calendar {
+    margin-top: 10px;
+    border-color: #000;
+  }
+  .calendar__mouth {
+    font-size: 24px;
+  }
+  .calendar__top {
+    width: 100%;
+    padding: 0 99px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
 </style>
