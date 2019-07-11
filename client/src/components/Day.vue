@@ -36,6 +36,7 @@
     background: #17a2b8;
     margin: 0.5px;
     border: 0.5px solid #ffffff;
+    transition: .3s;
   }
   .calendar__day:hover {
     transform: scale(1.02);

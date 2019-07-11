@@ -15,115 +15,23 @@
     </div>
 
     <b-modal id="newEvent" title="Book room" hide-footer>
-      <b-form @submit="newEventSubmit">
-        <b-form-group
-          id="newEvent-group-1"
-          label="Select room:*"
-          label-for="newEvent-select-room"
-        >
-          <b-form-select id="newEvent-select-room" v-model="newEventForm.room" required>
-            <option :value='null'>Please select</option>
-            <option value="red">Room Red</option>
-            <option value="blue">Room Bue</option>
-            <option value="green">Room Green</option>
-          </b-form-select>
-        </b-form-group>
-
-        <b-alert show variant="danger" v-if='errors.room'>Select room please</b-alert>
-
-        <b-form-group
-          id="newEvent-group-2"
-          label="Select day:*"
-          label-for="newEvent-day"
-        >
-          <b-form-input
-            id="newEvent-day"
-            v-model="newEventForm.day"
-            type="date"
-            :min='minDateValue()'
-            required
-            placeholder="Select day"
-          ></b-form-input>
-        </b-form-group>
-        <b-alert show variant="danger" v-if='errors.day'>Enter date please</b-alert>
-
-        <b-row>
-          <b-col cols='6'>
-            <b-form-group 
-              id="newEvent-group-3" 
-              label="Select start time:*" 
-              label-for="newEvent-start-time"
-            >
-              <b-form-input
-                id="newEvent-start-time"
-                v-model="newEventForm.startTime"
-                required
-                type='time'
-                min="08:00" 
-                max="19:45"
-                placeholder="Select start time"
-              ></b-form-input>
-            </b-form-group>
-            <b-alert show variant="danger" v-if='errors.startTime'>Min time 8:00, max 19:45</b-alert>
-          </b-col>
-
-          <b-col cols='6'>
-            <b-form-group 
-              id="newEvent-group-4" 
-              label="Select start time:*" 
-              label-for="newEvent-End-time"
-            >
-              <b-form-input
-                id="newEvent-end-time"
-                v-model="newEventForm.endTime"
-                required
-                type='time'
-                min="08:15" 
-                max="20:00"
-                placeholder="Select start time"
-              ></b-form-input>
-            </b-form-group>
-            <b-alert show variant="danger" v-if='errors.endTime'>Min time 8:15, max 20:00</b-alert>
-          </b-col>
-        </b-row>
-
-        <b-form-group 
-          id="newEvent-group-5" 
-          label="Note:" 
-          label-for="newEvent-note"
-        >
-          <b-form-textarea
-            id="newEvent-note"
-            v-model="newEventForm.note"
-            placeholder="Enter notes..."
-            rows="4"
-            max-rows="6"
-          ></b-form-textarea>
-        </b-form-group>
-        
-
-        <b-form-group label="Is recurrent?">
-          <b-form-radio  name="recurrent-radio" value="A">No</b-form-radio>
-          <b-form-radio  name="recurrent-radio" value="B">Yes</b-form-radio>
-        </b-form-group>
-
-
-        <b-button type="submit" variant="primary">Submit</b-button>
-      </b-form>
+      <NewEvent :currentDate='currentDate()' :dayOnClick='dayOnClick'/>
     </b-modal>
+
   </fragment>
 </template>
 
 <script>
 import Week from '@/components/Week';
 import DaysOfWeek from '@/components/DaysOfWeek';
-import VueTimepicker from 'vuejs-timepicker';
+import NewEvent from '@/components/NewEvent';
 
 export default {
   name: 'Month',
   components: {
     Week, 
-    DaysOfWeek
+    DaysOfWeek,
+    NewEvent
   },
   data() {
     return {
@@ -131,26 +39,12 @@ export default {
       getYear: this.getCurrentYear(),
       daysName: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
       monthsName: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-      newEventForm: {
-        room: 'red',
-        day: '',
-        startTime: '08:00',
-        endTime: '09:00',
-        note: '',
-        recurrent: false,
-        type: '',
-      },
-      errors: {
-        startTime: false,
-        endTime: false,
-        room: false,
-        day: false,
-      },
       dayOnClick: {},
     }
   },
   methods: {
 
+    // вызов поп-апа "новый ивент"
     modalEventHandler(day) {
       this.dayOnClick = day;
       let eventDate = this.currentDate().replace('-', '').replace('-', '');
@@ -167,49 +61,10 @@ export default {
 
       if (!day.gray && !day.weekend) {
         this.$bvModal.show('newEvent');
-        this.newEventForm.day = this.currentDate();
       }
     },
 
-    newEventSubmit(event) {
-      event.preventDefault();
-      if (this.newEventForm.startTime < '08:00' || this.newEventForm.startTime > '19:45') {
-        this.errors.startTime = true;
-      } else {
-        this.errors.startTime = false;
-      }
-      if (this.newEventForm.endTime < '08:15' || this.newEventForm.endTime > '20:00') {
-        this.errors.endTime = true;
-      } else {
-        this.errors.endTime = false;
-      }
-      if(!this.newEventForm.room) {
-        this.errors.room = true;
-      } else {
-        this.errors.room = false;
-      }
-      if(!this.newEventForm.day) {
-        this.errors.day = true;
-      } else {
-        this.errors.day = false;
-      }
-      console.log('submit')
-    },
-
-    // минимальная дата(текущая) при выборе дня события
-    minDateValue() {
-      var dateObj = new Date();
-      var day = dateObj.getDate();
-      var month = dateObj.getMonth() + 1;
-      var year = dateObj.getFullYear();
-      if (day < 10) {
-        day = '0'+day;
-      }
-      if (month < 10) {
-        month = '0'+month;
-      }
-      return year+"-"+month+"-"+day;
-    },
+    // логика календаря
 
     // данный день по клику на него(для автозаполнения инпута дня)
     currentDate() {
@@ -267,8 +122,10 @@ export default {
                     year === currentDate.getFullYear() ? true : false,
           month: month,
           year: year,
+          eventDate: this
         };
         date.setDate(date.getDate() + 1);
+        
       }
       return monthDays;
     },
