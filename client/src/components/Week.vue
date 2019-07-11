@@ -1,7 +1,7 @@
 <template>
-  <tr>
-    <Day v-for='(day, index) in week' :key='index' :day='day'></Day>
-  </tr>
+  <div class="calendar__row">
+    <Day v-for='(day, index) in week' :key='index' :day='day' :modalEventHandler='modalEventHandler'></Day>
+  </div>
 </template>
 
 <script>
@@ -12,10 +12,13 @@ import Day from './Day';
     components: {
       Day
     },
-    props: ['createCurrentMonth', 'week']
+    props: ['createCurrentMonth', 'week', 'modalEventHandler']
   }
 </script>
 
 <style>
-
+  .calendar__row {
+    display: flex;
+    flex-direction: row;
+  }
 </style>

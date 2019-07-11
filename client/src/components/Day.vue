@@ -1,42 +1,28 @@
 <template>
-  <fragment>
-    <td :class="{ 
-        'calendar__grey': day.gray, 
-        'calendar__current': day.presentDay, 
-        'calendar__weekend' : day.weekend }"
-        class="calendar__day"
-        :click="modalEventHandler"
-    >
-      <span class="calendar__day-nubmer">
-        {{ day.number }}
-      </span>
-    </td>
-
-    <b-modal id="newEvent" title="Modal with Popover" ok-only>
-      <p>
-        This
-        <b-button v-b-popover="'Popover inside a modal!'" title="Popover">Button</b-button>
-        triggers a popover on click.
-      </p>
-      <p>
-        This <a href="#" v-b-tooltip title="Tooltip in a modal!">Link</a> will show a tooltip on
-        hover.
-      </p>
-    </b-modal>
-  </fragment>
-  
-
+  <div 
+    class="calendar__day"
+    :class="{ 
+    'calendar__grey': day.gray, 
+    'calendar__current': day.presentDay, 
+    'calendar__weekend' : day.weekend }"
+    v-on:click="modalEventHandler(day)"
+  >
+    <span class="calendar__day-nubmer">
+      {{ day.number }}
+    </span>
+  </div>
 </template>
 
 <script>
   export default {
     name: 'Day',
-    props: ['day'],
+    props: ['day', 'modalEventHandler'],
     methods: {
-      modalEventHandler() {
-        console.log(1)
-        // this.$bvModal.show('newEvent');
-      }
+      // modalEventHandler(day) {
+      //   if (!day.gray && !day.weekend) {
+      //     this.$bvModal.show('newEvent');
+      //   }
+      // }
     }
   }
 </script>
@@ -45,10 +31,14 @@
   .calendar__day {
     width: 130px;
     height: 130px;
-    display: inline-table;
     position: relative;
     cursor: pointer;
-    background: #B8EAB6;
+    background: #17a2b8;
+    margin: 0.5px;
+    border: 0.5px solid #ffffff;
+  }
+  .calendar__day:hover {
+    transform: scale(1.02);
   }
   .calendar__day-nubmer {
     position: absolute;
@@ -56,14 +46,18 @@
     right: 10px;
   }
   .calendar__weekend {
-    background: rgba(239, 85, 85, 0.65);
+    background: #dc3545;
     cursor: not-allowed;
   }
   .calendar__grey {
-    background: #ccc;
+    background: #bcbfc1;
     cursor: not-allowed;
   }
   .calendar__current {
     border: 4px solid red;
+  }
+  .calendar__current .calendar__day-nubmer {
+    right: 7px;
+    top: 1px;
   }
 </style>
