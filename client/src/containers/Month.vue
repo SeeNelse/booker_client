@@ -14,24 +14,26 @@
       </div>
     </div>
 
-    <b-modal id="newEvent" title="Book A Room" ok-only>
+    <b-modal id="newEvent" title="Book room" hide-footer>
       <b-form @submit="newEventSubmit">
         <b-form-group
           id="newEvent-group-1"
-          label="Select room:"
-          label-for="newEvent-select"
+          label="Select room:*"
+          label-for="newEvent-select-room"
         >
-          <b-form-select id="newEvent-select" v-model="newEventForm.room">
-            <option :value="null">Please select</option>
-            <option value="a">Room A</option>
-            <option value="b">Room B</option>
-            <option value="c">Room C</option>
+          <b-form-select id="newEvent-select-room" v-model="newEventForm.room" required>
+            <option :value='null'>Please select</option>
+            <option value="red">Room Red</option>
+            <option value="blue">Room Bue</option>
+            <option value="green">Room Green</option>
           </b-form-select>
         </b-form-group>
 
+        <b-alert show variant="danger" v-if='errors.room'>Select room please</b-alert>
+
         <b-form-group
           id="newEvent-group-2"
-          label="Select day:"
+          label="Select day:*"
           label-for="newEvent-day"
         >
           <b-form-input
@@ -43,36 +45,70 @@
             placeholder="Select day"
           ></b-form-input>
         </b-form-group>
+        <b-alert show variant="danger" v-if='errors.day'>Enter date please</b-alert>
 
-        <b-form-group id="newEvent-group-3" label="Select start time:" label-for="newEvent-start-time">
-          <b-form-input
-            id="newEvent-start-time"
-            v-model="newEventForm.timeStart"
-            required
-            type='time'
-            placeholder="Select start time"
-          ></b-form-input>
-        </b-form-group>
-        <!-- <time> -->
+        <b-row>
+          <b-col cols='6'>
+            <b-form-group 
+              id="newEvent-group-3" 
+              label="Select start time:*" 
+              label-for="newEvent-start-time"
+            >
+              <b-form-input
+                id="newEvent-start-time"
+                v-model="newEventForm.startTime"
+                required
+                type='time'
+                min="08:00" 
+                max="19:45"
+                placeholder="Select start time"
+              ></b-form-input>
+            </b-form-group>
+            <b-alert show variant="danger" v-if='errors.startTime'>Min time 8:00, max 19:45</b-alert>
+          </b-col>
 
-        <!-- <b-form-group id="newEvent-group-3" label="Food:" label-for="input-3">
-          <b-form-select
-            id="input-3"
-            v-model="newEventForm.food"
-            :options="foods"
-            required
-          ></b-form-select>
+          <b-col cols='6'>
+            <b-form-group 
+              id="newEvent-group-4" 
+              label="Select start time:*" 
+              label-for="newEvent-End-time"
+            >
+              <b-form-input
+                id="newEvent-end-time"
+                v-model="newEventForm.endTime"
+                required
+                type='time'
+                min="08:15" 
+                max="20:00"
+                placeholder="Select start time"
+              ></b-form-input>
+            </b-form-group>
+            <b-alert show variant="danger" v-if='errors.endTime'>Min time 8:15, max 20:00</b-alert>
+          </b-col>
+        </b-row>
+
+        <b-form-group 
+          id="newEvent-group-5" 
+          label="Note:" 
+          label-for="newEvent-note"
+        >
+          <b-form-textarea
+            id="newEvent-note"
+            v-model="newEventForm.note"
+            placeholder="Enter notes..."
+            rows="4"
+            max-rows="6"
+          ></b-form-textarea>
+        </b-form-group>
+        
+
+        <b-form-group label="Is recurrent?">
+          <b-form-radio  name="recurrent-radio" value="A">No</b-form-radio>
+          <b-form-radio  name="recurrent-radio" value="B">Yes</b-form-radio>
         </b-form-group>
 
-        <b-form-group id="newEvent-group-4">
-          <b-form-checkbox-group v-model="newEventForm.checked" id="checkboxes-4">
-            <b-form-checkbox value="me">Check me out</b-form-checkbox>
-            <b-form-checkbox value="that">Check that out</b-form-checkbox>
-          </b-form-checkbox-group>
-        </b-form-group>
 
         <b-button type="submit" variant="primary">Submit</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button> -->
       </b-form>
     </b-modal>
   </fragment>
@@ -96,13 +132,19 @@ export default {
       daysName: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
       monthsName: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       newEventForm: {
-        room: null,
+        room: 'red',
         day: '',
-        timeStart: '',
-        timeEnd: '',
-        Node: '',
-        Recurrent: false,
+        startTime: '08:00',
+        endTime: '09:00',
+        note: '',
+        recurrent: false,
         type: '',
+      },
+      errors: {
+        startTime: false,
+        endTime: false,
+        room: false,
+        day: false,
       },
       dayOnClick: {},
     }
@@ -129,8 +171,29 @@ export default {
       }
     },
 
-    newEventSubmit() {
-      console.log()
+    newEventSubmit(event) {
+      event.preventDefault();
+      if (this.newEventForm.startTime < '08:00' || this.newEventForm.startTime > '19:45') {
+        this.errors.startTime = true;
+      } else {
+        this.errors.startTime = false;
+      }
+      if (this.newEventForm.endTime < '08:15' || this.newEventForm.endTime > '20:00') {
+        this.errors.endTime = true;
+      } else {
+        this.errors.endTime = false;
+      }
+      if(!this.newEventForm.room) {
+        this.errors.room = true;
+      } else {
+        this.errors.room = false;
+      }
+      if(!this.newEventForm.day) {
+        this.errors.day = true;
+      } else {
+        this.errors.day = false;
+      }
+      console.log('submit')
     },
 
     // минимальная дата(текущая) при выборе дня события
@@ -287,7 +350,7 @@ export default {
       return this.createCurrentMonth(this.getYear, this.getMonth);
     },
 
-  }
+  },
 }
 </script>
 
@@ -301,6 +364,14 @@ export default {
   }
   .calendar__top {
     margin: 10px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+  .calendar__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .calendar__controller {
     width: 100%;
