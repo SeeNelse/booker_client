@@ -18,11 +18,7 @@
     name: 'Day',
     props: ['day', 'modalEventHandler'],
     methods: {
-      // modalEventHandler(day) {
-      //   if (!day.gray && !day.weekend) {
-      //     this.$bvModal.show('newEvent');
-      //   }
-      // }
+
     }
   }
 </script>

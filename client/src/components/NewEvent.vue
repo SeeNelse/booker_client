@@ -48,7 +48,6 @@
               max="19:45"
               placeholder="Select start time"
             ></b-form-input>
-            <!-- <datetime type="time" v-model="newEventForm.startTime" class='calendar__time'/> -->
           </b-form-group>
           <b-alert show variant="danger" v-if='errors.startTime'>Min time 8:00, max 19:45</b-alert>
         </b-col>
@@ -68,13 +67,12 @@
               max="20:00"
               placeholder="Select start time"
             ></b-form-input>
-            <!-- <datetime type="time" v-model="newEventForm.endTime" format='T' class='calendar__time'/> -->
           </b-form-group>
           <b-alert show variant="danger" v-if='errors.endTime'>Min time 8:15, max 20:00</b-alert>
         </b-col>
       </b-row>
       <b-alert show variant="danger" v-if='errors.time'>Incorrect value</b-alert>
-      <b-alert show variant="danger" v-if='errors.time15min'>Min value 15 min</b-alert>
+      <b-alert show variant="danger" v-if='errors.time15min'>Minimum difference is 15 minutes</b-alert>
 
       <b-form-group 
         id="newEvent-group-5" 
@@ -151,7 +149,7 @@ export default {
       newEventForm: {
         room: 'red',
         day: '',
-        startTime: '08:00',
+        startTime: '08:45',
         endTime: '09:00',
         note: '',
         recurrent: {
@@ -180,43 +178,51 @@ export default {
     newEventSubmit(event) {
       event.preventDefault();
 
-      console.log(this.newEventForm);
-
-      let startTime = +this.newEventForm.startTime.replace(':', '');
-      let endTime = +this.newEventForm.endTime.replace(':', '');
-
-      // console.log(startTime, endTime);
-
       // // Проверки
-      // let datetest = new Date('22/01/2000',this.newEventForm.startTime);
-      // console.log(datetest);
+
+      // Проверка на разницу 15 минут
+      let startTime = this.newEventForm.startTime.split(':');
+      let endTime = this.newEventForm.endTime.split(':');
+      let startTimeMin = (+startTime[0] * 60) + +startTime[1];
+      let endTimeMin = (+endTime[0] * 60) + +endTime[1];
+      if (!((startTimeMin - endTimeMin) <= -15)) {
+        this.errors.time15min = true;
+        return false;
+      } else {
+        this.errors.time15min = false;
+      }
 
       if (!this.newEventForm.room) {
         this.errors.room = true;
+        return false;
       } else {
         this.errors.room = false;
       }
 
       if (!this.newEventForm.day) {
         this.errors.day = true;
+        return false;
       } else {
         this.errors.day = false;
       }
 
       if (this.newEventForm.startTime >= this.newEventForm.endTime) {
         this.errors.time = true;
+        return false;
       } else {
         this.errors.time = false;
       }
 
       if (this.newEventForm.startTime < '08:00' || this.newEventForm.startTime > '19:45') {
         this.errors.startTime = true;
+        return false;
       } else {
         this.errors.startTime = false;
       }
       
       if (this.newEventForm.endTime < '08:15' || this.newEventForm.endTime > '20:00') {
         this.errors.endTime = true;
+        return false;
       } else {
         this.errors.endTime = false;
       }
@@ -227,6 +233,7 @@ export default {
         this.newEventForm.recurrent.type === 'Weekly' && this.newEventForm.recurrent.countWeekly > 4
       ) {
         this.errors.reccurent = true;
+        return false;
       } else {
         this.errors.reccurent = false;
       }
@@ -236,6 +243,7 @@ export default {
         this.newEventForm.recurrent.type === 'Biweekly' && this.newEventForm.recurrent.countBiweekly > 2
       ) {
         this.errors.reccurent = true;
+        return false;
       } else {
         this.errors.reccurent = false;
       }
@@ -243,6 +251,7 @@ export default {
       if (
         this.newEventForm.recurrent.type === 'Monthly' && this.newEventForm.recurrent.countMonthly != 1) {
         this.errors.reccurent = true;
+        return false;
       } else {
         this.errors.reccurent = false;
       }

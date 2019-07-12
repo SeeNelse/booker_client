@@ -11,13 +11,10 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Fragment from 'vue-fragment';
-import Datetime from 'vue-datetime';
-import 'vue-datetime/dist/vue-datetime.css'
 
 
 
 // Vue.use(Vuex);
-Vue.use(Datetime);
 Vue.use(Fragment.Plugin);
 Vue.use(BootstrapVue);
 library.add(faChevronRight, faChevronLeft);
