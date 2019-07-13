@@ -23,14 +23,14 @@
       >
         <b-form-input
           id="newEvent-day"
-          v-model="newEventForm.day"
+          v-model="newEventForm.date"
           type="date"
           :min='minDateValue()'
           required
           placeholder="Select day"
         ></b-form-input>
       </b-form-group>
-      <b-alert show variant="danger" v-if='errors.day'>Enter date please</b-alert>
+      <b-alert show variant="danger" v-if='errors.date'>Enter date please</b-alert>
 
       <b-row>
         <b-col cols='4'>
@@ -161,11 +161,12 @@ export default {
     return {
       newEventForm: {
         room: 'red',
-        day: '',
+        date: '',
         startTime: new Date('Jan 01 1970 08:00:00'),
         endTime: new Date('Jan 01 1970 09:00:00'),
         note: '',
         formatAmPm: '',
+        userId: '1',
         recurrent: {
           status: false,
           type: '',
@@ -178,7 +179,7 @@ export default {
         startTime: false,
         endTime: false,
         room: false,
-        day: false,
+        date: false,
         reccurent: false,
         time: false,
         time15min: false,
@@ -187,7 +188,7 @@ export default {
     }
   },
   created() {
-    this.newEventForm.day = this.currentDate;
+    this.newEventForm.date = this.currentDate;
   },
   methods: {
     newEventSubmit(event) {
@@ -201,11 +202,11 @@ export default {
         this.errors.room = false;
       }
 
-      if (!this.newEventForm.day) {
-        this.errors.day = true;
+      if (!this.newEventForm.date) {
+        this.errors.date = true;
         return false;
       } else {
-        this.errors.day = false;
+        this.errors.date = false;
       }
 
       if (this.newEventForm.startTime >= this.newEventForm.endTime) {
@@ -257,29 +258,21 @@ export default {
       } else {
         this.errors.note = false;
       }
-
-      // let bookTime = startFullTime + '-' + endFullTime;
-      // store.state.events[this.newEventForm.room] = {
-      //   ...store.state.events[this.newEventForm.room],
-      //   [this.newEventForm.day] : {
-      //     [bookTime] : this.newEventForm
-      //   }
-      // }
-
-      
-      // console.log(Object.keys(store.state.events[this.newEventForm.room][this.newEventForm.day]));
-      //ЗАКРЫТЬ ПОПАП
-      console.log(this.newEventForm);
      
       const eventDataForDB = JSON.stringify(this.newEventForm);
       axios.post('http://localhost:8000/api/event/new', eventDataForDB)
         .then((response) => {
+          console.log(12123132, response);
           let responseObj = JSON.parse(Object.keys(response.data)[0]);
-          let date = new Date(responseObj.startTime);
-          console.log(responseObj);
+          console.log('1231231', responseObj);
+          if (!responseObj) {
+            console.log('ERROR');
+          } else {
+
+          }
         })
         .catch((error) => {
-          console.log(error);
+          console.log(111, error);
         });
 
     },

@@ -16,23 +16,33 @@ module.exports = function(app) {
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     let queryResult = Events.getEventsForThisMonth(request.params);
-    if (queryResult) {
-      queryResult
-        .then(ViewResult => View.getData(ViewResult, request.params.format))
-        .then(result => response.status(HttpStatus.OK).send(result));
-    } else {
-      let errorResult = Errors.nomFound();
-      response.status(HttpStatus.NOT_FOUND).send(View.getData(errorResult, request.params.format));
-    }
+    queryResult
+      .then(ViewResult => View.getData(ViewResult, request.params.format))
+      .then(result => {
+        if (result.length) {
+          response.status(HttpStatus.OK).send(result)
+        } else {
+          response.status(HttpStatus.NOT_FOUND).send(View.getData(Errors.nomFound(), request.params.format))
+        }
+      });
     
   });
 
+  // Записываем новые значения в базу
   app.post('/api/event/new', (request, response) => {
     console.log('work!');
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
     let queryNewEvent = Events.setNewEvent(request.body);
+    queryNewEvent.then(result => {
+      if (result) {
+        // отправка
+      } else {
+        response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.nomFound(), request.params.format));
+      }
+    });
+
     // response.send(request.body)
     // queryResult
     //   .then(ViewResult => View.getData(ViewResult, request.params.format))

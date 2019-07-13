@@ -10,6 +10,7 @@
 
       <div class="selected-event__btns">
         <b-button @click="$bvModal.hide('selectedEvent')" variant="primary">Ok</b-button>
+        <b-button @click="$bvModal.hide('selectedEvent')" variant="primary">Ok</b-button>
       </div>
   </fragment>
 </template>
@@ -18,11 +19,6 @@
 export default {
   name: 'SelectedEvent',
   props: ['selectedEventObj'],
-  data() {
-    return {
-
-    }
-  },
 }
 </script>
 

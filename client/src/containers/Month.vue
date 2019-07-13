@@ -66,6 +66,10 @@ export default {
       fetch(`http://localhost:8000/api/event/${this.getYear}/${this.getMonth}`)
         .then(response => response.json())
         .then(json => {
+          if (json.status === 404) {
+            this.eventForThisMonth = [];
+            return false;
+          }
           this.eventForThisMonth = json;
         })
         .catch(error => {
