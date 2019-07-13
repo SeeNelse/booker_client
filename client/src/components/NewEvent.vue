@@ -33,44 +33,53 @@
       <b-alert show variant="danger" v-if='errors.day'>Enter date please</b-alert>
 
       <b-row>
-        <b-col cols='6'>
+        <b-col cols='4'>
           <b-form-group 
             id="newEvent-group-3" 
             label="Select start time:*" 
             label-for="newEvent-start-time"
           >
-            <b-form-input
-              id="newEvent-start-time"
+            <b-timepicker
+              rounded
+              
+              placeholder="Click to select..."
+              icon="clock"
+              :min-time="new Date('Fri Jul 12 2019 08:00:00')"
+              :max-time="new Date('Fri Jul 12 2019 19:45:00')"
+              :increment-minutes='15'
+              :hour-format="format"
               v-model="newEventForm.startTime"
-              required
-              type='time'
-              min="08:00" 
-              max="19:45"
-              placeholder="Select start time"
-            ></b-form-input>
+            />
           </b-form-group>
           <b-alert show variant="danger" v-if='errors.startTime'>Min time 8:00, max 19:45</b-alert>
         </b-col>
 
-        <b-col cols='6'>
+        <b-col cols='4'>
           <b-form-group 
             id="newEvent-group-4" 
             label="Select end time:*" 
             label-for="newEvent-End-time"
           >
-            <b-form-input
-              id="newEvent-end-time"
+            <b-timepicker
+              rounded
               v-model="newEventForm.endTime"
-              required
-              type='time'
-              min="08:15" 
-              max="20:00"
-              placeholder="Select start time"
-            ></b-form-input>
+              placeholder="Click to select..."
+              icon="clock"
+              :min-time="new Date('Fri Jul 12 2019 08:15:00')"
+              :max-time="new Date('Fri Jul 12 2019 20:00:00')"
+              :increment-minutes='15'
+              :hour-format="format"
+            />
           </b-form-group>
           <b-alert show variant="danger" v-if='errors.endTime'>Min time 8:15, max 20:00</b-alert>
         </b-col>
+        <b-col cols='4' class="calendar__timeFormat">
+          <div class="control">
+            <b-switch v-model="newEventForm.formatAmPm">AM/PM</b-switch>
+          </div>
+        </b-col>
       </b-row>
+      
       <b-alert show variant="danger" v-if='errors.time'>Incorrect value</b-alert>
       <b-alert show variant="danger" v-if='errors.time15min'>Minimum difference is 15 minutes</b-alert>
 
@@ -87,6 +96,8 @@
           max-rows="6"
         ></b-form-textarea>
       </b-form-group>
+
+      <b-alert show variant="danger" v-if='errors.note'>250 characters maximum</b-alert>
       
       <b-form-group label="Is recurrent?">
         <b-form-radio-group label="Is recurrent?" v-model="newEventForm.recurrent.status">
@@ -140,6 +151,8 @@
 
 <script>
 import store from '@/Store';
+import axios from 'axios';
+
 
 export default {
   name: 'NewEvent',
@@ -149,15 +162,16 @@ export default {
       newEventForm: {
         room: 'red',
         day: '',
-        startTime: '08:45',
-        endTime: '09:00',
+        startTime: new Date('Jan 01 1970 08:00:00'),
+        endTime: new Date('Jan 01 1970 09:00:00'),
         note: '',
+        formatAmPm: '',
         recurrent: {
           status: false,
           type: '',
-          countWeekly: 1,
-          countBiweekly: 1,
-          countMonthly: 1,
+          countWeekly: '',
+          countBiweekly: '',
+          countMonthly: '',
         },
       },
       errors: {
@@ -168,6 +182,7 @@ export default {
         reccurent: false,
         time: false,
         time15min: false,
+        note: false,
       },
     }
   },
@@ -177,21 +192,8 @@ export default {
   methods: {
     newEventSubmit(event) {
       event.preventDefault();
-
-      // // Проверки
-
-      // Проверка на разницу 15 минут
-      let startTime = this.newEventForm.startTime.split(':');
-      let endTime = this.newEventForm.endTime.split(':');
-      let startTimeMin = (+startTime[0] * 60) + +startTime[1];
-      let endTimeMin = (+endTime[0] * 60) + +endTime[1];
-      if (!((startTimeMin - endTimeMin) <= -15)) {
-        this.errors.time15min = true;
-        return false;
-      } else {
-        this.errors.time15min = false;
-      }
-
+      
+      // Проверки
       if (!this.newEventForm.room) {
         this.errors.room = true;
         return false;
@@ -213,20 +215,13 @@ export default {
         this.errors.time = false;
       }
 
-      if (this.newEventForm.startTime < '08:00' || this.newEventForm.startTime > '19:45') {
-        this.errors.startTime = true;
-        return false;
-      } else {
-        this.errors.startTime = false;
-      }
+      let startTime = this.newEventForm.startTime;
+      let startTimeMin = startTime.getHours() * 60 + startTime.getMinutes();
+      let startFullTime = startTime.getHours() + ':' + startTime.getMinutes();
       
-      if (this.newEventForm.endTime < '08:15' || this.newEventForm.endTime > '20:00') {
-        this.errors.endTime = true;
-        return false;
-      } else {
-        this.errors.endTime = false;
-      }
-
+      let endTime = this.newEventForm.endTime;
+      let endTimeMin = endTime.getHours() * 60 + endTime.getMinutes();
+      let endFullTime = endTime.getHours() + ':' + endTime.getMinutes();
 
       if (
         this.newEventForm.recurrent.type === 'Weekly' && this.newEventForm.recurrent.countWeekly < 1 || 
@@ -256,19 +251,37 @@ export default {
         this.errors.reccurent = false;
       }
 
+      if (this.newEventForm.note.length > 250) {
+        this.errors.note = true;
+        return false;
+      } else {
+        this.errors.note = false;
+      }
+
+      // let bookTime = startFullTime + '-' + endFullTime;
+      // store.state.events[this.newEventForm.room] = {
+      //   ...store.state.events[this.newEventForm.room],
+      //   [this.newEventForm.day] : {
+      //     [bookTime] : this.newEventForm
+      //   }
+      // }
+
       
-      // ЗАПИСЬ В БАЗУ
-      // console.log(store.state.events); 
-      // let codeDate = this.newEventForm.startTime+'-'+this.newEventForm.endTime;
-      // console.log(codeDate);
-      // store.state.events[this.newEventForm.day] = {...store.state.events[this.newEventForm.day], [codeDate]: this.newEventForm};
+      // console.log(Object.keys(store.state.events[this.newEventForm.room][this.newEventForm.day]));
+      //ЗАКРЫТЬ ПОПАП
+      console.log(this.newEventForm);
+     
+      const eventDataForDB = JSON.stringify(this.newEventForm);
+      axios.post('http://localhost:8000/api/event/new', eventDataForDB)
+        .then((response) => {
+          let responseObj = JSON.parse(Object.keys(response.data)[0]);
+          let date = new Date(responseObj.startTime);
+          console.log(responseObj);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
 
-      // console.log(store.state.events);
-
-      // store.state.events[this.newEventForm.day] = [this.newEventForm.startTime+'-'+this.newEventForm.endTime];
-      // store.state.events[this.newEventForm.startTime+'-'+this.newEventForm.endTime] = this.newEventForm;
-
-      console.log(store.state.events);
     },
 
      // минимальная дата(текущая) при выборе дня события
@@ -285,27 +298,21 @@ export default {
       }
       return year+"-"+month+"-"+day;
     },
+  },
+  computed: {
+    format() {
+      return this.newEventForm.formatAmPm ? '12' : '24'
+    }
   }
 }
 </script>
 
 <style>
-  .calendar__time input {
-    display: block;
-    width: 100%;
-    height: calc(1.5em + 0.75rem + 2px);
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    -webkit-transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
-    transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+  .calendar__timeFormat {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding-top: 25px;
   }
 </style>

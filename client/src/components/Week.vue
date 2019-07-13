@@ -1,6 +1,12 @@
 <template>
   <div class="calendar__row">
-    <Day v-for='(day, index) in week' :key='index' :day='day' :modalEventHandler='modalEventHandler'></Day>
+    <Day 
+      v-for='(day, index) in week' 
+      :key='index' 
+      :day='day' 
+      :modalNewEventHandler='modalNewEventHandler' 
+      :modalEventHandler='modalEventHandler'
+    />
   </div>
 </template>
 
@@ -12,7 +18,10 @@ import Day from './Day';
     components: {
       Day
     },
-    props: ['createCurrentMonth', 'week', 'modalEventHandler']
+    props: ['week', 'modalNewEventHandler', 'modalEventHandler'],
+    created() {
+      // console.log('here', this.eventForThisMonth());
+    }
   }
 </script>
 

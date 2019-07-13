@@ -9,5 +9,5 @@ module.exports = {
   host     : 'localhost',
   user     : 'root',
   password : '',
-  database : 'showroom',
+  database : 'booker',
 };

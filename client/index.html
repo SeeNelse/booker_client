@@ -10,27 +10,27 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
-    // $.ajax({
-    //   type: "post",
-    //   crossDomain: true,
-    //   data: {
-    //     name: 'MyName',
-    //     descr: 'MyDecsr'
-    //   },
-    //   url: "http://localhost:8000/notes",
-    //   success: function(resp){
-    //     console.log('post:', resp);
-    //   },
-    // });
-
     $.ajax({
-      type: "get",
-      // dataType: "json",
-      url: "http://localhost:8000/api/notes/",
+      type: "post",
+      crossDomain: true,
+      data: {
+        name: 'MyName',
+        descr: 'MyDecsr'
+      },
+      url: "http://localhost:8000/api/event/new",
       success: function(resp){
-        console.log('get:', resp);
+        console.log('post:', resp);
       },
     });
+
+    // $.ajax({
+    //   type: "get",
+    //   // dataType: "json",
+    //   url: "http://localhost:8000/api/event/2019/6/.txt",
+    //   success: function(resp){
+    //     console.log('get:', resp);
+    //   },
+    // });
 
     // $.ajax({
     //   type: "put",

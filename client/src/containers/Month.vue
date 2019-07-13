@@ -10,12 +10,22 @@
         <DaysOfWeek v-for='(item, index) in daysName' :item='item' :key='index'></DaysOfWeek>
       </div>
       <div class="calendar__body">
-        <Week :create-current-month='getCurrentMonthDays' v-for='(week, index) in getCurrentMonthDays' :key='index' :week='week' :modalEventHandler='modalEventHandler'></Week>
+        <Week 
+          v-for='(week, index) in getCurrentMonthDays' 
+          :key='index' 
+          :week='week' 
+          :modalNewEventHandler='modalNewEventHandler'
+          :modalEventHandler='modalEventHandler'
+        />
       </div>
     </div>
 
     <b-modal id="newEvent" title="Book room" hide-footer>
       <NewEvent :currentDate='currentDate()' :dayOnClick='dayOnClick'/>
+    </b-modal>
+
+    <b-modal id="selectedEvent" title="Event" hide-footer>
+      <SelectedEvent :selectedEventObj='selectedEventObj' />
     </b-modal>
 
   </fragment>
@@ -25,13 +35,16 @@
 import Week from '@/components/Week';
 import DaysOfWeek from '@/components/DaysOfWeek';
 import NewEvent from '@/components/NewEvent';
+import SelectedEvent from '@/components/SelectedEvent';
+import store from '@/Store';
 
 export default {
   name: 'Month',
   components: {
     Week, 
     DaysOfWeek,
-    NewEvent
+    NewEvent,
+    SelectedEvent
   },
   data() {
     return {
@@ -40,12 +53,28 @@ export default {
       daysName: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
       monthsName: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       dayOnClick: {},
+      eventForThisMonth: [],
+      selectedEventObj: {}
     }
   },
+  created() {
+    this.getEventsForThisMonth();
+  },
   methods: {
+    // Функция ивентов на текущий месяц
+    getEventsForThisMonth() {
+      fetch(`http://localhost:8000/api/event/${this.getYear}/${this.getMonth}`)
+        .then(response => response.json())
+        .then(json => {
+          this.eventForThisMonth = json;
+        })
+        .catch(error => {
+          console.log('error', error);
+        });
+    },
 
     // вызов поп-апа "новый ивент"
-    modalEventHandler(day) {
+    modalNewEventHandler(day) {
       this.dayOnClick = day;
       let eventDate = this.currentDate().replace('-', '').replace('-', '');
 
@@ -64,6 +93,11 @@ export default {
       }
     },
 
+    modalEventHandler(event) {
+      this.selectedEventObj = event;
+      this.$bvModal.show('selectedEvent');
+    },
+    
     // логика календаря
 
     // данный день по клику на него(для автозаполнения инпута дня)
@@ -122,33 +156,29 @@ export default {
                     year === currentDate.getFullYear() ? true : false,
           month: month,
           year: year,
-          eventDate: this
+          events: [],
+          scanned: false
         };
+        monthDays[date.getDate()-1].fullDate = monthDays[date.getDate()-1].year + '-' + // строка в виде "yyyy-mm-dd"
+          (monthDays[date.getDate()-1].month < 10 ? '0' + monthDays[date.getDate()-1].month : monthDays[date.getDate()-1].month) + '-' + 
+          (monthDays[date.getDate()-1].number < 10 ? '0' + monthDays[date.getDate()-1].number : monthDays[date.getDate()-1].number);
+
+        // Добавляем ивенты в нужные дни
+        if (this.getMonth === month) { // проверка на текущий месяц
+          let events = this.eventForThisMonth;
+          events.map(el => {
+            if (el.day === monthDays[date.getDate()-1].number) {
+              monthDays[date.getDate()-1].events.push(el)
+            }
+          });
+        };
+
         date.setDate(date.getDate() + 1);
-        
       }
       return monthDays;
     },
 
-    monthToWeeks(month) {
-      let resultMonth = [],
-      week = 0,
-      days = -1;
-      resultMonth[0] = []
-      for (let key in month) {
-        if (days < 6) {
-          days++;
-        } else { 
-          week++;
-          days = 0;
-          resultMonth[week] = []; 
-        }
-        resultMonth[week][days] = month[key];
-        
-      }
-      return resultMonth;
-    },
-
+    // создаем объект месяца и соседних месяцев
     createCurrentMonth(year, month) {
       let previousMonth = this.daysOfMonth(year, month-1).reverse();
       let currentMonth = this.daysOfMonth(year, month);
@@ -188,11 +218,33 @@ export default {
       return this.monthToWeeks(result);
     },
 
+    // ВСПОМНИ ЧТО ЭТО И ДОПИШИ
+    monthToWeeks(month) {
+      let resultMonth = [],
+      week = 0,
+      days = -1;
+      resultMonth[0] = []
+      for (let key in month) {
+        if (days < 6) {
+          days++;
+        } else { 
+          week++;
+          days = 0;
+          resultMonth[week] = []; 
+        }
+        resultMonth[week][days] = month[key];
+        
+      }
+      return resultMonth;
+    },
+
+    // текущий месяц
     getCurrentMonthNumber() {
       let currentMonth = new Date();
       return currentMonth.getMonth();
     },
 
+    // текущий год
     getCurrentYear() {
       let currentMonth = new Date();
       return currentMonth.getFullYear();
@@ -200,14 +252,18 @@ export default {
 
 
   },
-
   computed: {
-
+    // стягиваем месяцы при листании календаря
     getCurrentMonthDays() {
       return this.createCurrentMonth(this.getYear, this.getMonth);
     },
-
   },
+  watch: {
+    // стягиваем ивенты при листании календаря
+    getMonth() {
+      this.getEventsForThisMonth();
+    }
+  }
 }
 </script>
 
@@ -229,6 +285,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
   }
   .calendar__controller {
     width: 100%;
@@ -237,4 +294,5 @@ export default {
     flex-direction: row;
     justify-content: space-between;
   }
+
 </style>

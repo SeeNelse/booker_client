@@ -11,10 +11,13 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Fragment from 'vue-fragment';
+import { Timepicker } from 'buefy/dist/components/timepicker';
+Vue.component('b-timepicker', Timepicker);
+import { Switch } from 'buefy/dist/components/switch';
+Vue.component('b-switch', Switch);
+import '@/css/timePicker.css';
 
 
-
-// Vue.use(Vuex);
 Vue.use(Fragment.Plugin);
 Vue.use(BootstrapVue);
 library.add(faChevronRight, faChevronLeft);

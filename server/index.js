@@ -4,13 +4,6 @@ const app            = express();
 const port           = 8000;
 const routes = require('./app/routes');
 
-
-
-// mysqlServer.connect(function(err) {
-//   if (err) throw err;
-//   console.log("Connected!");
-// });
-
 app.use(bodyParser.urlencoded({ extended: true }));
 routes(app);
 

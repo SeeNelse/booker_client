@@ -1,0 +1,633 @@
+:focus {
+  outline: none;
+}
+.switch {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.switch+.switch {
+  margin-left: 0.5em;
+}
+
+.switch input[type=checkbox] {
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  outline: none;
+  z-index: -1;
+}
+
+.switch input[type=checkbox]+.check {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 2.75em;
+  height: 1.575em;
+  padding: 0.2em;
+  background: #b5b5b5;
+  border-radius: 1em;
+  transition: background 150ms ease-out;
+}
+
+.switch input[type=checkbox]+.check:before {
+  content: "";
+  display: block;
+  border-radius: 1em;
+  width: 1.175em;
+  height: 1.175em;
+  background: whitesmoke;
+  box-shadow: 0 3px 1px 0 rgba(0, 0, 0, 0.05), 0 2px 2px 0 rgba(0, 0, 0, 0.1), 0 3px 3px 0 rgba(0, 0, 0, 0.05);
+  transition: transform 150ms ease-out, width 150ms ease-out;
+  will-change: transform;
+}
+
+.switch input[type=checkbox]+.check.is-elastic:before {
+  width: 1.75em;
+}
+
+.switch input[type=checkbox]:checked+.check {
+  background: #17a2b8;
+}
+
+.switch input[type=checkbox]:checked+.check.is-white {
+  background: white;
+}
+
+.switch input[type=checkbox]:checked+.check.is-black {
+  background: #0a0a0a;
+}
+
+.switch input[type=checkbox]:checked+.check.is-light {
+  background: whitesmoke;
+}
+
+.switch input[type=checkbox]:checked+.check.is-dark {
+  background: #363636;
+}
+
+.switch input[type=checkbox]:checked+.check.is-primary {
+  background: #17a2b8;
+}
+
+.switch input[type=checkbox]:checked+.check.is-link {
+  background: #17a2b8;
+}
+
+.switch input[type=checkbox]:checked+.check.is-info {
+  background: #167df0;
+}
+
+.switch input[type=checkbox]:checked+.check.is-success {
+  background: #23d160;
+}
+
+.switch input[type=checkbox]:checked+.check.is-warning {
+  background: #ffdd57;
+}
+
+.switch input[type=checkbox]:checked+.check.is-danger {
+  background: #ff3860;
+}
+
+.switch input[type=checkbox]:checked+.check:before {
+  transform: translate3d(100%, 0, 0);
+}
+
+.switch input[type=checkbox]:checked+.check.is-elastic:before {
+  transform: translate3d(36.36364%, 0, 0);
+}
+
+.switch input[type=checkbox]:focus {
+  outline: none;
+}
+
+.switch input[type=checkbox]:focus+.check {
+  box-shadow: 0 0 0.5em rgba(122, 122, 122, 0.6);
+}
+
+.switch input[type=checkbox]:focus:checked+.check {
+  box-shadow: 0 0 0.5em rgba(65, 195, 224, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-white {
+  box-shadow: 0 0 0.5em rgba(255, 255, 255, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-black {
+  box-shadow: 0 0 0.5em rgba(10, 10, 10, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-light {
+  box-shadow: 0 0 0.5em rgba(245, 245, 245, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-dark {
+  box-shadow: 0 0 0.5em rgba(54, 54, 54, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-primary {
+  box-shadow: 0 0 0.5em rgba(65, 195, 224, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-link {
+  box-shadow: 0 0 0.5em rgba(65, 195, 224, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-info {
+  box-shadow: 0 0 0.5em rgba(22, 125, 240, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-success {
+  box-shadow: 0 0 0.5em rgba(35, 209, 96, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-warning {
+  box-shadow: 0 0 0.5em rgba(255, 221, 87, 0.8);
+}
+
+.switch input[type=checkbox]:focus:checked+.check.is-danger {
+  box-shadow: 0 0 0.5em rgba(255, 56, 96, 0.8);
+}
+
+.switch .control-label {
+  padding-left: 0.5em;
+}
+
+.switch:hover input[type=checkbox]+.check {
+  background: rgba(181, 181, 181, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check {
+  background: #17a2b8;
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-white {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-black {
+  background: rgba(10, 10, 10, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-light {
+  background: rgba(245, 245, 245, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-dark {
+  background: rgba(54, 54, 54, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-primary {
+  background: #17a2b8;
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-link {
+  background: #17a2b8;
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-info {
+  background: rgba(22, 125, 240, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-success {
+  background: rgba(35, 209, 96, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-warning {
+  background: rgba(255, 221, 87, 0.9);
+}
+
+.switch:hover input[type=checkbox]:checked+.check.is-danger {
+  background: rgba(255, 56, 96, 0.9);
+}
+
+.switch.is-small {
+  border-radius: 2px;
+  font-size: 0.75rem;
+}
+
+.switch.is-medium {
+  font-size: 1.25rem;
+}
+
+.switch.is-large {
+  font-size: 1.5rem;
+}
+
+.switch[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #7a7a7a;
+}
+
+.timepicker .dropdown-menu {
+  min-width: 0;
+}
+
+.timepicker .dropdown,
+.timepicker .dropdown-trigger {
+  width: 100%;
+}
+
+.timepicker .dropdown-item,
+.timepicker .dropdown .dropdown-menu .has-link a,
+.dropdown .dropdown-menu .has-link .timepicker a {
+  font-size: inherit;
+  padding: 0;
+}
+
+.timepicker .timepicker-footer {
+  /* padding: 0 0.5rem 0 0.5rem; */
+}
+
+.timepicker .dropdown-content .control {
+  font-size: 1.25em;
+  margin-right: 0 !important;
+  line-height: 29px;
+}
+
+.timepicker .dropdown-content .control .select select {
+  font-weight: 600;
+  padding-right: calc(0.625em - 1px);
+  border: 0;
+}
+
+.timepicker .dropdown-content .control .select select option:disabled {
+  color: rgba(122, 122, 122, 0.7);
+}
+
+.timepicker .dropdown-content .control .select:after {
+  display: none;
+}
+
+.timepicker .dropdown-content .control.is-colon {
+  font-size: 1.7em;
+}
+
+.timepicker.is-small {
+  border-radius: 2px;
+  font-size: 0.75rem;
+}
+
+.timepicker.is-medium {
+  font-size: 1.25rem;
+}
+
+.timepicker.is-large {
+  font-size: 1.5rem;
+}
+
+.field.is-floating-in-label> :not(.datepicker):not(.timepicker):not(.taginput) .input,
+.field.is-floating-in-label> :not(.datepicker):not(.timepicker):not(.taginput) .taginput .taginput-container.is-focusable,
+.taginput .field.is-floating-in-label> :not(.datepicker):not(.timepicker):not(.taginput) .taginput-container.is-focusable,
+.field.is-floating-in-label> :not(.datepicker):not(.timepicker):not(.taginput) .textarea,
+.field.is-floating-in-label> :not(.datepicker):not(.timepicker):not(.taginput) select {
+  padding-top: calc(3.25em / 2 - (1.5rem * 3 / 4) / 2);
+  padding-bottom: 1px;
+  height: 3.25em;
+}
+
+.control {
+  box-sizing: border-box;
+  clear: both;
+  font-size: 1rem;
+  position: relative;
+  text-align: left;
+}
+
+.control.has-icons-left .input:focus~.icon,
+.control.has-icons-left .taginput .taginput-container.is-focusable:focus~.icon,
+.taginput .control.has-icons-left .taginput-container.is-focusable:focus~.icon,
+.control.has-icons-left .select:focus~.icon,
+.control.has-icons-right .input:focus~.icon,
+.control.has-icons-right .taginput .taginput-container.is-focusable:focus~.icon,
+.taginput .control.has-icons-right .taginput-container.is-focusable:focus~.icon,
+.control.has-icons-right .select:focus~.icon {
+  color: #7a7a7a;
+}
+
+.control.has-icons-left .input.is-small~.icon,
+.control.has-icons-left .taginput .is-small.taginput-container.is-focusable~.icon,
+.taginput .control.has-icons-left .is-small.taginput-container.is-focusable~.icon,
+.control.has-icons-left .select.is-small~.icon,
+.control.has-icons-right .input.is-small~.icon,
+.control.has-icons-right .taginput .is-small.taginput-container.is-focusable~.icon,
+.taginput .control.has-icons-right .is-small.taginput-container.is-focusable~.icon,
+.control.has-icons-right .select.is-small~.icon {
+  font-size: 0.75rem;
+}
+
+.control.has-icons-left .input.is-medium~.icon,
+.control.has-icons-left .taginput .is-medium.taginput-container.is-focusable~.icon,
+.taginput .control.has-icons-left .is-medium.taginput-container.is-focusable~.icon,
+.control.has-icons-left .select.is-medium~.icon,
+.control.has-icons-right .input.is-medium~.icon,
+.control.has-icons-right .taginput .is-medium.taginput-container.is-focusable~.icon,
+.taginput .control.has-icons-right .is-medium.taginput-container.is-focusable~.icon,
+.control.has-icons-right .select.is-medium~.icon {
+  font-size: 1.25rem;
+}
+
+.control.has-icons-left .input.is-large~.icon,
+.control.has-icons-left .taginput .is-large.taginput-container.is-focusable~.icon,
+.taginput .control.has-icons-left .is-large.taginput-container.is-focusable~.icon,
+.control.has-icons-left .select.is-large~.icon,
+.control.has-icons-right .input.is-large~.icon,
+.control.has-icons-right .taginput .is-large.taginput-container.is-focusable~.icon,
+.taginput .control.has-icons-right .is-large.taginput-container.is-focusable~.icon,
+.control.has-icons-right .select.is-large~.icon {
+  font-size: 1.5rem;
+}
+
+.control.has-icons-left .icon,
+.control.has-icons-right .icon {
+  color: #dbdbdb;
+  height: 2.25em;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 2.25em;
+  z-index: 4;
+}
+
+.control.has-icons-left .input,
+.control.has-icons-left .taginput .taginput-container.is-focusable,
+.taginput .control.has-icons-left .taginput-container.is-focusable,
+.control.has-icons-left .select select {
+  padding-left: 2.25em;
+  display: block;
+  width: 100%;
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+}
+
+.control.has-icons-left .icon.is-left {
+  left: 0;
+}
+
+.control.has-icons-right .input,
+.control.has-icons-right .taginput .taginput-container.is-focusable,
+.taginput .control.has-icons-right .taginput-container.is-focusable,
+.control.has-icons-right .select select {
+  padding-right: 2.25em;
+}
+
+.control.has-icons-right .icon.is-right {
+  right: 0;
+}
+
+.control.is-loading::after {
+  position: absolute !important;
+  right: 0.625em;
+  top: 0.625em;
+  z-index: 4;
+}
+
+.control.is-loading.is-small:after {
+  font-size: 0.75rem;
+}
+
+.control.is-loading.is-medium:after {
+  font-size: 1.25rem;
+}
+
+.control.is-loading.is-large:after {
+  font-size: 1.5rem;
+}
+
+.input.is-rounded,
+.taginput .is-rounded.taginput-container.is-focusable {
+  border-radius: 290486px;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.input[readonly],
+.taginput .taginput-container.is-focusable[readonly],
+.textarea[readonly] {
+  box-shadow: none;
+}
+
+.button,
+.input,
+.taginput .taginput-container.is-focusable,
+.textarea,
+.select select,
+.file-cta,
+.file-name,
+.pagination-previous,
+.pagination-next,
+.pagination-link,
+.pagination-ellipsis {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  box-shadow: none;
+  display: inline-flex;
+  font-size: 1rem;
+  height: 2.25em;
+  justify-content: flex-start;
+  line-height: 1.5;
+  padding-bottom: calc(0.375em - 1px);
+  padding-left: calc(0.625em - 1px);
+  padding-right: calc(0.625em - 1px);
+  padding-top: calc(0.375em - 1px);
+  position: relative;
+  vertical-align: top;
+}
+
+.button:focus,
+.input:focus,
+.taginput .taginput-container.is-focusable:focus,
+.textarea:focus,
+.select select:focus,
+.file-cta:focus,
+.file-name:focus,
+.pagination-previous:focus,
+.pagination-next:focus,
+.pagination-link:focus,
+.pagination-ellipsis:focus,
+.is-focused.button,
+.is-focused.input,
+.taginput .is-focused.taginput-container.is-focusable,
+.is-focused.textarea,
+.select select.is-focused,
+.is-focused.file-cta,
+.is-focused.file-name,
+.is-focused.pagination-previous,
+.is-focused.pagination-next,
+.is-focused.pagination-link,
+.is-focused.pagination-ellipsis,
+.button:active,
+.input:active,
+.taginput .taginput-container.is-focusable:active,
+.textarea:active,
+.select select:active,
+.file-cta:active,
+.file-name:active,
+.pagination-previous:active,
+.pagination-next:active,
+.pagination-link:active,
+.pagination-ellipsis:active,
+.is-active.button,
+.is-active.input,
+.taginput .is-active.taginput-container.is-focusable,
+.is-active.textarea,
+.select select.is-active,
+.is-active.file-cta,
+.is-active.file-name,
+.is-active.pagination-previous,
+.is-active.pagination-next,
+.is-active.pagination-link,
+.is-active.pagination-ellipsis {
+  outline: none;
+}
+
+.button[disabled],
+.input[disabled],
+.taginput .taginput-container.is-focusable[disabled],
+.textarea[disabled],
+.select select[disabled],
+.file-cta[disabled],
+.file-name[disabled],
+.pagination-previous[disabled],
+.pagination-next[disabled],
+.pagination-link[disabled],
+.pagination-ellipsis[disabled],
+fieldset[disabled] .button,
+fieldset[disabled] .input,
+fieldset[disabled] .taginput .taginput-container.is-focusable,
+.taginput fieldset[disabled] .taginput-container.is-focusable,
+fieldset[disabled] .textarea,
+fieldset[disabled] .select select,
+.select fieldset[disabled] select,
+fieldset[disabled] .file-cta,
+fieldset[disabled] .file-name,
+fieldset[disabled] .pagination-previous,
+fieldset[disabled] .pagination-next,
+fieldset[disabled] .pagination-link,
+fieldset[disabled] .pagination-ellipsis {
+  cursor: not-allowed;
+}
+
+.dropdown {
+  display: inline-flex;
+  position: relative;
+  vertical-align: top; }
+  .dropdown.is-active .dropdown-menu, .dropdown.is-hoverable:hover .dropdown-menu {
+    display: block; }
+  .dropdown.is-right .dropdown-menu {
+    left: auto;
+    right: 0; }
+  .dropdown.is-up .dropdown-menu {
+    bottom: 100%;
+    padding-bottom: 4px;
+    padding-top: initial;
+    top: auto; }
+
+.dropdown-menu {
+  display: none;
+  left: 0;
+  min-width: 12rem;
+  padding: 0 !important;
+  position: absolute;
+  top: 100%;
+  z-index: 20; 
+}
+
+.dropdown-content {
+  background-color: white;
+  /* border-radius: 4px; */
+  /* box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1); */
+  /* padding-bottom: 0.5rem; */
+  /* padding-top: 0.5rem;  */
+}
+
+.dropdown-item, .dropdown .dropdown-menu .has-link a {
+  color: #4a4a4a;
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  /* padding: 0.375rem 1rem; */
+  position: relative; }
+
+a.dropdown-item, .dropdown .dropdown-menu .has-link a,
+button.dropdown-item {
+  padding-right: 3rem;
+  text-align: left;
+  white-space: nowrap;
+  width: 100%; }
+  a.dropdown-item:hover, .dropdown .dropdown-menu .has-link a:hover,
+  button.dropdown-item:hover {
+    background-color: whitesmoke;
+    color: #0a0a0a; }
+  a.dropdown-item.is-active, .dropdown .dropdown-menu .has-link a.is-active,
+  button.dropdown-item.is-active {
+    background-color: #17a2b8;
+    color: white; }
+
+.dropdown-divider {
+  background-color: #dbdbdb;
+  border: none;
+  display: block;
+  height: 1px;
+  /* margin: 0.5rem 0;  */
+}
+
+  .field.is-grouped .field {
+    flex-shrink: 0; }
+    .field.is-grouped .field:not(:last-child) {
+      margin-right: 0.75rem; }
+    .field.is-grouped .field.is-expanded {
+      flex-grow: 1;
+      flex-shrink: 1; }
+
+      .field.is-grouped {
+        display: flex;
+        justify-content: flex-start; }
+        .field.is-grouped > .control {
+          flex-shrink: 0; }
+          .field.is-grouped > .control:not(:last-child) {
+            margin-bottom: 0;
+            margin-right: 0.75rem; }
+          .field.is-grouped > .control.is-expanded {
+            flex-grow: 1;
+            flex-shrink: 1; }
+        .field.is-grouped.is-grouped-centered {
+          justify-content: center; }
+        .field.is-grouped.is-grouped-right {
+          justify-content: flex-end; }
+        .field.is-grouped.is-grouped-multiline {
+          flex-wrap: wrap; }
+          .field.is-grouped.is-grouped-multiline > .control:last-child, .field.is-grouped.is-grouped-multiline > .control:not(:last-child) {
+            margin-bottom: 0.75rem; }
+          .field.is-grouped.is-grouped-multiline:last-child {
+            margin-bottom: -0.75rem; }
+          .field.is-grouped.is-grouped-multiline:not(:last-child) {
+            margin-bottom: 0; }
+
+.timepicker .dropdown-content .control .select select option[disabled="disabled"] {
+  display: none;
+}
+
+.dropdown-content .dropdown-item.active, .dropdown-item:active {
+  background: none;
+  color: #000000;
+}
