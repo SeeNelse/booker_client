@@ -21,7 +21,7 @@
     </div>
 
     <b-modal id="newEvent" title="Book room" hide-footer>
-      <NewEvent :currentDate='currentDate()' :dayOnClick='dayOnClick'/>
+      <NewEvent :currentDate='currentDate()' :getEventsForThisMonth='getEventsForThisMonth' :dayOnClick='dayOnClick'/>
     </b-modal>
 
     <b-modal id="selectedEvent" title="Event" hide-footer>
@@ -71,9 +71,6 @@ export default {
             return false;
           }
           this.eventForThisMonth = json;
-        })
-        .catch(error => {
-          console.log('error', error);
         });
     },
 

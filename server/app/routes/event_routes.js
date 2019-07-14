@@ -30,24 +30,20 @@ module.exports = function(app) {
 
   // Записываем новые значения в базу
   app.post('/api/event/new', (request, response) => {
-    console.log('work!');
+    console.log('*****************************************************************');
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
     let queryNewEvent = Events.setNewEvent(request.body);
+    // console.log(queryNewEvent);// Проверка если пришел false, тру не будет, т.к. приходит только промис
     queryNewEvent.then(result => {
-      if (result) {
-        // отправка
-      } else {
-        response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.nomFound(), request.params.format));
-      }
+      console.log(result);
+      // if (result) {
+        // response.status(HttpStatus.OK).send(result);
+      // } else {
+        // response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.nomFound(), request.params.format));
+      // }
     });
-
-    // response.send(request.body)
-    // queryResult
-    //   .then(ViewResult => View.getData(ViewResult, request.params.format))
-    //   .then(result => response.send(result));
-
   });
 
   // Запись нового ивента в базу

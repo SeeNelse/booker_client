@@ -8,8 +8,8 @@ CREATE TABLE booker_event (
   `month` INT(4) NOT NULL , 
   `user_id` INT(6) NOT NULL , 
   `room_id` INT(6) NOT NULL ,
-  `recurrent_name` ENUM("Weekly","Biweekly","Monthly","") ,
-  `recurrent_count` INT(1) NULL DEFAULT NULL , 
+  `recurrent_type` BOOLEAN NOT NULL,
+  `recurrent_id` INT(36) NULL DEFAULT NULL , 
   PRIMARY KEY (`event_id`));
 
 INSERT INTO `booker_event` (`event_id`, `note`, `time_start`, `time_end`, `year`, `day`, `month`, `user_id`, `room_id`, `recurrent_name`, `recurrent_count`) VALUES (NULL, 'Desrc', '08:00', '09:00', '2019', '18', '6', '1', '1', NULL, NULL);

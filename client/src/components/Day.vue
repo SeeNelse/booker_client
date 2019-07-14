@@ -10,43 +10,58 @@
     <span class="calendar__day-nubmer">
       {{ day.number }}
     </span>
-    <!-- {{ getEvents() }} -->
-    <div v-if='getEvents().length' v-for='event in getEvents()'>
-      <b-badge class="calendar__day-event" variant="dark" v-on:click="modalEventHandler(event)">{{event.time_start}} - {{event.time_end}}</b-badge>
+
+    <div v-if='getEvents().length'>
+      <!-- <vue-custom-scrollbar class="scroll-area" :settings="settings" @ps-scroll-y="scrollHanle"> -->
+        <div v-for='event in getEvents()' >
+          <b-badge class="calendar__day-event" variant="dark" v-on:click="modalEventHandler(event)">{{event.time_start}} - {{event.time_end}}</b-badge>
+        </div>
+      <!-- </vue-custom-scrollbar> -->
     </div>
+    
   </div>
 </template>
 
 <script>
-  export default {
-    name: 'Day',
-    props: ['day', 'modalNewEventHandler', 'modalEventHandler'],
-    data() {
-      return {
-        events: []
+import vueCustomScrollbar from 'vue-custom-scrollbar'
+export default {
+  name: 'Day',
+  components: {
+    vueCustomScrollbar
+  },
+  props: ['day', 'modalNewEventHandler', 'modalEventHandler'],
+  data() {
+    return {
+      settings: {
+        maxScrollbarLength: 20,
+        suppressScrollY: true
       }
+    }
+  },
+  methods: {
+    scrollHanle(evt) {
+      console.log(evt)
     },
-    methods: {
-      getEvents() {
-        if (!this.day.scanned && this.day.events.length) {
-          this.day.events.forEach(element => {
-            let startTime = new Date(element.time_start);
-            let startFullTime = (startTime.getHours() < 10 ? '0' + startTime.getHours() : startTime.getHours()) 
-              + ':' + (startTime.getMinutes() == 0 ? startTime.getMinutes() + '0' : startTime.getMinutes());
-            element.time_start = startFullTime;
+    getEvents() {
+      if (!this.day.scanned && this.day.events.length) {
+        this.day.events.forEach(element => {
+          let startTime = new Date(element.time_start);
+          let startFullTime = (startTime.getHours() < 10 ? '0' + startTime.getHours() : startTime.getHours()) 
+            + ':' + (startTime.getMinutes() == 0 ? startTime.getMinutes() + '0' : startTime.getMinutes());
+          element.time_start = startFullTime;
 
-            let endTime = new Date(element.time_end);
-            let endFullTime = (endTime.getHours() < 10 ? '0' + endTime.getHours() : endTime.getHours()) 
-              + ':' + (endTime.getMinutes() == 0 ? endTime.getMinutes() + '0' : endTime.getMinutes());
-            
-            element.time_end = endFullTime;
-          });
-          this.day.scanned = true;
-        }
-        return this.day.events;
+          let endTime = new Date(element.time_end);
+          let endFullTime = (endTime.getHours() < 10 ? '0' + endTime.getHours() : endTime.getHours()) 
+            + ':' + (endTime.getMinutes() == 0 ? endTime.getMinutes() + '0' : endTime.getMinutes());
+          
+          element.time_end = endFullTime;
+        });
+        this.day.scanned = true;
       }
-    },
-  }
+      return this.day.events;
+    }
+  },
+}
 </script>
 
 <style>
@@ -61,6 +76,7 @@
     transition: .3s;
     padding-left: 5px;
     padding-top: 5px;
+    /* overflow: hidden; */
   }
   .calendar__day-handler {
     position: absolute;
@@ -102,5 +118,11 @@
   .calendar__current .calendar__day-nubmer {
     right: 7px;
     top: 1px;
+  }
+  .scroll-area {
+    position: relative;
+    margin: auto;
+     /* width: 600px; */
+    height: 400px; 
   }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <fragment>
       <b-list-group>
-        <b-list-group-item>Name: {{selectedEventObj.user_name}}</b-list-group-item>
+        <b-list-group-item>Name: {{selectedEventObj.user_name}}(id: {{selectedEventObj.user_id}})</b-list-group-item>
         <b-list-group-item>Time: {{selectedEventObj.time_start}} - {{selectedEventObj.time_end}}</b-list-group-item>
         <b-list-group-item>Date: {{selectedEventObj.day}}-{{+selectedEventObj.month+1 < 10 ? '0' + (+selectedEventObj.month+1) : +selectedEventObj.month+1}}-{{selectedEventObj.year}}</b-list-group-item>
         <b-list-group-item>Room: {{selectedEventObj.room_name}}</b-list-group-item>

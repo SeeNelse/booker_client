@@ -3,7 +3,6 @@ const js2xmlparser = require("js2xmlparser");
 module.exports = class View {
 
   getData(queryResult, format) {
-
     switch(format) {
       case '.xml':
         return js2xmlparser.parse("item", queryResult);

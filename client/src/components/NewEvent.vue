@@ -144,6 +144,8 @@
       </div>
 
       <b-button type="submit" variant="primary">Submit</b-button>
+      <b-alert show variant="success" class='calendar__success' v-if='eventSuccess'>You have successfully registered an event</b-alert>
+      <b-alert show variant="danger" class='calendar__success' v-if='errors.timeTaken'>This time is already taken</b-alert>
     </b-form>
   </fragment>
 </template>
@@ -156,7 +158,7 @@ import axios from 'axios';
 
 export default {
   name: 'NewEvent',
-  props: ['currentDate', 'dayOnClick'],
+  props: ['currentDate', 'dayOnClick', 'getEventsForThisMonth'],
   data() {
     return {
       newEventForm: {
@@ -169,10 +171,10 @@ export default {
         userId: '1',
         recurrent: {
           status: false,
-          type: '',
-          countWeekly: '',
-          countBiweekly: '',
-          countMonthly: '',
+          type: 'Weekly',
+          countWeekly: '1',
+          countBiweekly: '1',
+          countMonthly: '1',
         },
       },
       errors: {
@@ -184,7 +186,9 @@ export default {
         time: false,
         time15min: false,
         note: false,
+        timeTaken: false,
       },
+      eventSuccess: false
     }
   },
   created() {
@@ -216,13 +220,13 @@ export default {
         this.errors.time = false;
       }
 
-      let startTime = this.newEventForm.startTime;
-      let startTimeMin = startTime.getHours() * 60 + startTime.getMinutes();
-      let startFullTime = startTime.getHours() + ':' + startTime.getMinutes();
+      // let startTime = this.newEventForm.startTime;
+      // let startTimeMin = startTime.getHours() * 60 + startTime.getMinutes();
+      // let startFullTime = startTime.getHours() + ':' + startTime.getMinutes();
       
-      let endTime = this.newEventForm.endTime;
-      let endTimeMin = endTime.getHours() * 60 + endTime.getMinutes();
-      let endFullTime = endTime.getHours() + ':' + endTime.getMinutes();
+      // let endTime = this.newEventForm.endTime;
+      // let endTimeMin = endTime.getHours() * 60 + endTime.getMinutes();
+      // let endFullTime = endTime.getHours() + ':' + endTime.getMinutes();
 
       if (
         this.newEventForm.recurrent.type === 'Weekly' && this.newEventForm.recurrent.countWeekly < 1 || 
@@ -244,8 +248,7 @@ export default {
         this.errors.reccurent = false;
       }
 
-      if (
-        this.newEventForm.recurrent.type === 'Monthly' && this.newEventForm.recurrent.countMonthly != 1) {
+      if (this.newEventForm.recurrent.type === 'Monthly' && this.newEventForm.recurrent.countMonthly != 1) {
         this.errors.reccurent = true;
         return false;
       } else {
@@ -262,22 +265,23 @@ export default {
       const eventDataForDB = JSON.stringify(this.newEventForm);
       axios.post('http://localhost:8000/api/event/new', eventDataForDB)
         .then((response) => {
-          console.log(12123132, response);
-          let responseObj = JSON.parse(Object.keys(response.data)[0]);
-          console.log('1231231', responseObj);
-          if (!responseObj) {
-            console.log('ERROR');
-          } else {
-
+          if (response.status === 200) {
+            this.eventSuccess = true;
+            this.errors.timeTaken = false;
+            this.getEventsForThisMonth();
+            setTimeout(function() {
+              this.eventSuccess = true;
+              this.$bvModal.hide('newEvent');
+            }.bind(this), 2000);
           }
         })
         .catch((error) => {
-          console.log(111, error);
+          this.errors.timeTaken = true;
         });
 
     },
 
-     // минимальная дата(текущая) при выборе дня события
+    // минимальная дата(текущая) при выборе дня события
     minDateValue() {
       var dateObj = new Date();
       var day = dateObj.getDate();
@@ -291,6 +295,7 @@ export default {
       }
       return year+"-"+month+"-"+day;
     },
+
   },
   computed: {
     format() {
@@ -307,5 +312,8 @@ export default {
     justify-content: center;
     align-items: center;
     padding-top: 25px;
+  }
+  .calendar__success {
+    margin-top: 10px;
   }
 </style>
