@@ -131,14 +131,6 @@
         </b-form-group>
         <b-form-group>
           <b-form-radio name="recurrent-apply-radio" v-model="newEventForm.recurrent.type" value="Monthly">Monthly</b-form-radio>
-          <b-form-input
-            v-if='newEventForm.recurrent.type === "Monthly"'
-            v-model="newEventForm.recurrent.countMonthly"
-            type="number"
-            required
-            min='1'
-            max='1'
-          ></b-form-input>
         </b-form-group>
         <b-alert show variant="danger" v-if='errors.reccurent'>Incorrect value</b-alert>
       </div>

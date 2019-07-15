@@ -38,26 +38,6 @@ module.exports = class DataBase {
 
   // Получаем все ивенты месяца
   getEventsForThisMonth(params) {
-    let query = `
-    SELECT 
-      booker_event.event_id,
-      booker_event.time_start,
-      booker_event.time_end,
-      booker_event.note,
-      booker_event.year,
-      booker_event.day,
-      booker_event.month,
-      booker_event.recurrent_type,
-      booker_event.recurrent_id,
-      booker_event.user_id,
-
-      booker_rooms.room_name
-    FROM booker_event
-
-    INNER JOIN booker_rooms
-    ON booker_event.room_id = booker_rooms.room_id
-    WHERE year = '${params.year}' AND month = '${params.month}'`;
-    // Нормальный запрос, использовать в итоге ЕГО!!!!!!
     // let query = `
     // SELECT 
     //   booker_event.event_id,
@@ -70,14 +50,35 @@ module.exports = class DataBase {
     //   booker_event.recurrent_type,
     //   booker_event.recurrent_id,
     //   booker_event.user_id,
-    //   booker_users.user_name,
+
     //   booker_rooms.room_name
     // FROM booker_event
-    // INNER JOIN booker_users
-    // ON booker_event.user_id = booker_users.user_id
+
     // INNER JOIN booker_rooms
     // ON booker_event.room_id = booker_rooms.room_id
     // WHERE year = '${params.year}' AND month = '${params.month}'`;
+
+    // Нормальный запрос, использовать в итоге ЕГО!!!!!!
+    let query = `
+    SELECT 
+      booker_event.event_id,
+      booker_event.time_start,
+      booker_event.time_end,
+      booker_event.note,
+      booker_event.year,
+      booker_event.day,
+      booker_event.month,
+      booker_event.recurrent_type,
+      booker_event.recurrent_id,
+      booker_event.user_id,
+      booker_users.user_name,
+      booker_rooms.room_name
+    FROM booker_event
+    INNER JOIN booker_users
+    ON booker_event.user_id = booker_users.user_id
+    INNER JOIN booker_rooms
+    ON booker_event.room_id = booker_rooms.room_id
+    WHERE year = '${params.year}' AND month = '${params.month}'`;
     return this.sendQuery(query);
   }
 
@@ -86,83 +87,14 @@ module.exports = class DataBase {
     if (event.recurrent.status) {
       const calendar = CreateMonths.getCalendar(date.year, date.month);
       if (event.recurrent.type === 'Weekly') {
-        let recurrentDates = [];
-
-        calendar.forEach((element, index) => {
-          if (element.month === date.month && element.number === +date.number) {
-            let currentDateIndex = index;
-            for (let i = 0; i < +event.recurrent.countWeekly+1; i++) {
-              if (currentDateIndex != index) {
-                recurrentDates.push(calendar[currentDateIndex]);
-              }
-              currentDateIndex = currentDateIndex + 7;
-            }
-          }
-        });
-
-        const waitFor = (ms) => new Promise(r => setTimeout(r, ms));
-        async function asyncForEach(array, callback) {
-          for (let index = 0; index < array.length; index++) {
-            await callback(array[index], index, array);
-          }
-        }
-
-        let timeIsBusy = false; // Флаг для проверки на время
-        const checkAndGetQuerys = async (check) => {
-          let querys = '';
-          await asyncForEach(recurrentDates, async (element) => {
-            await waitFor(20);
-            if (check) { // Проверка на занятое время
-              let checkResult = await this.newEventTimeCheck(event, element);
-              if(!checkResult) {
-                timeIsBusy = true;
-              }
-            } else { // Генерация значений для запросов
-              querys += await this.getReccurentValues(event, element);
-            }
-          });
-          if (querys) {
-            return querys.slice(0, -1);
-          }
-        }
-
-        return (async () => {
-          await checkAndGetQuerys(true);
-          if (timeIsBusy) {
-            return false;
-          }
-          // Если проверку на время прошли, записываем в базу:
-          let lastIdQuery = 'SELECT MAX(event_id) FROM booker_event;'
-          let currentId = await this.sendQuery(lastIdQuery);
-          currentId = currentId[0]['MAX(event_id)'] + 1;
-          
-          // собираем айди рекурентов
-          let recurrentId = [];
-          for (var i = 0; i < recurrentDates.length; i++) {
-            currentId++;
-            recurrentId.push(currentId);
-          }
-
-          // Записываем основную запись
-          let mainQuery = await this.getNewEventQuery(event, date, "'"+recurrentId+"'");
-          let mainQueryResult = await this.sendQuery(mainQuery);
-          if (!mainQueryResult.serverStatus === 2) {
-            return false;
-          }
-          
-          // Генерируем квери и записываем записи рекурентов
-          let recurrentValues = await checkAndGetQuerys(false);
-          let recurrentQuerys = await this.getNewEventRecurrentQuery(recurrentValues);
-          console.log(1111111, recurrentQuerys);
-          let recurrentResult = await this.sendQuery(recurrentQuerys);
-          if (!recurrentResult.serverStatus === 2) {
-            console.log(11111111);
-            return false;
-          } else {
-            console.log(22222222);
-            return true;
-          }
-        })();
+        let recurrentDates = this.getRecurrentsDates(event, date, calendar, 7);
+        return this.setRecurrentEvents(event, recurrentDates, date);
+      } else if (event.recurrent.type === 'Biweekly') {
+        let recurrentDates = this.getRecurrentsDates(event, date, calendar, 14);
+        return this.setRecurrentEvents(event, recurrentDates, date);
+      } else if (event.recurrent.type === 'Monthly') {
+        let recurrentDates = this.getRecurrentsDates(event, date, calendar, 'monthly');
+        return this.setRecurrentEvents(event, recurrentDates, date);
       }
 
     } else {
@@ -180,6 +112,7 @@ module.exports = class DataBase {
     }
   }
 
+  // Генерация запроса для одной записи
   getNewEventQuery(event, date, recurrentId = null) {
     return (async () => {
       let roomId = await this.getRoomId(event.room);
@@ -190,6 +123,7 @@ module.exports = class DataBase {
     })();
   }
   
+  // Генерация запросов для рекурентов
   getNewEventRecurrentQuery(values) {
     return (async () => {
       return `INSERT INTO booker_event 
@@ -198,13 +132,15 @@ module.exports = class DataBase {
     })();
   }
 
-  getReccurentValues(event, date) {
+  // Генерация значений для рекурентов
+  getRecurrentValues(event, date) {
     return (async () => {
       let roomId = await this.getRoomId(event.room);
       return `('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', '${date.number}', '${date.month}', '1', '${roomId[0].room_id}', true, null),`;
     })();
   }
 
+  // Генерация запроса для апдейта
   getUpdateEventQuery(event, date, recurrentId = null) {
     return (async () => {
       let roomId = await this.getRoomId(event.room);
@@ -215,11 +151,7 @@ module.exports = class DataBase {
     })();
   }
 
-  getRoomId(name) {
-    let query = `SELECT room_id FROM booker_rooms WHERE room_name = '${name}'`
-    return this.sendQuery(query);
-  }
-
+  // Генерация запроса для проверки ивентов в нужную дату
   getEventsForThisDay(date) {
     let query = `
     SELECT 
@@ -231,6 +163,110 @@ module.exports = class DataBase {
     FROM booker_event
     WHERE year = '${date.year}' AND month = '${date.month}' AND day = '${date.number}'`;
     return this.sendQuery(query); 
+  }
+
+  // Генерация запрос для получения айди комнаты
+  getRoomId(name) {
+    let query = `SELECT room_id FROM booker_rooms WHERE room_name = '${name}'`
+    return this.sendQuery(query);
+  }
+
+  // Запись ивентов с рекурентами.
+  setRecurrentEvents(event, recurrentDates, date) {
+    return (async () => {
+      // Проверка занятого времени
+      let timeIsBusy = await this.getCheckAndGenerateQuerys(event, recurrentDates, true);
+      if (timeIsBusy) {
+        return false;
+      }
+
+      // Забираем последний айди для вычисления айди рекурентов
+      let lastIdQuery = 'SELECT MAX(event_id) FROM booker_event;'
+      let currentId = await this.sendQuery(lastIdQuery);
+      currentId = currentId[0]['MAX(event_id)'] + 1;
+      
+      // собираем айди рекурентов
+      let recurrentId = [];
+      for (var i = 0; i < recurrentDates.length; i++) {
+        currentId++;
+        recurrentId.push(currentId);
+      }
+
+      // Записываем основную запись
+      let mainQuery = await this.getNewEventQuery(event, date, "'"+recurrentId+"'");
+      // let mainQueryResult = await this.sendQuery(mainQuery);
+      // if (mainQueryResult.serverStatus !== 2) {
+      //   return false;
+      // }
+      
+      // Генерируем квери и записываем записи рекурентов
+      let recurrentValues = await this.getCheckAndGenerateQuerys(event, recurrentDates, false);
+      let recurrentQuerys = await this.getNewEventRecurrentQuery(recurrentValues);
+      // let recurrentResult = await this.sendQuery(recurrentQuerys);
+
+      // if (recurrentResult.serverStatus !== 2) {
+      //   return false;
+      // } else {
+      //   return true;
+      // }
+    })();
+  }
+
+  // Генерация дат для рекурентов
+  getRecurrentsDates(event, date, calendar, recurrentDays) {
+    let recurrentDates = [];
+    calendar.forEach((element, index) => {
+      if (recurrentDays !== 'monthly') {
+        if (element.month === date.month && element.number === +date.number) {
+          let currentDateIndex = index;
+          for (let i = -1; i < +event.recurrent['count'+event.recurrent.type]; i++) {
+            if (currentDateIndex != index) {
+              recurrentDates.push(calendar[currentDateIndex]);
+            }
+            currentDateIndex = currentDateIndex + recurrentDays;
+          }
+        }
+      } else {
+
+      }
+    });
+    console.log(date);
+    return recurrentDates;
+  }
+
+  // Проверка свободного времени и генерация значений для рекурентов
+  getCheckAndGenerateQuerys(event, recurrentDates, check) {
+    // Вспомогательные функции для перебора массива с промисами
+    const waitFor = (ms) => new Promise(r => setTimeout(r, ms));
+    async function asyncForEach(array, callback) {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+      }
+    }
+
+    // Проверка на занятое время/генерация значений для запросов
+    const checkAndGetQuerys = async (check) => {
+      let timeIsBusy = false; // Флаг для проверки на время
+      let querys = '';
+      await asyncForEach(recurrentDates, async (element) => {
+        await waitFor(20);
+        if (check) { // Проверка
+          let checkResult = await this.newEventTimeCheck(event, element);
+          if(!checkResult) {
+            timeIsBusy = true;
+          }
+        } else { // Генерация
+          querys += await this.getRecurrentValues(event, element);
+        }
+      });
+      if (querys) {
+        return querys.slice(0, -1);
+      } else {
+        return timeIsBusy;
+      }
+    }
+
+    return checkAndGetQuerys(check);
   }
 
   // Проверяем время на совпадение
