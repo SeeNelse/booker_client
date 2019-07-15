@@ -1,16 +1,26 @@
 module.exports = class CalendarMonths {
 
   getCalendar(year, month) {
-    var date = new Date(year, month);
-    let currentMonth = this.createCurrentMonth(date, month, dates);
-    let secondMonth = this.createSecondMonth(date, month+1, dates);
-    var dates = [...currentMonth, ...secondMonth];
+    let date = new Date(year, month);
+    let currentMonth = this.createThreeMonths(date, month);
+    let secondMonth = this.createThreeMonths(date, month+1);
+    let thirtyMonth = this.createThreeMonths(date, month+2, true);
+    let dates = [...currentMonth, ...secondMonth, ...thirtyMonth];
     return dates;
   }
 
-  createCurrentMonth(date, month, dates) {
-    const currentMonth = [];
+  // Генерация первых двух полных месяцев и 5 дней третьего
+  createThreeMonths(date, month, thirty = false) {
+    let currentMonth = [];
+    if (month === 12) {
+      month = 0;
+    } else if (month === 13) {
+      month = 1;
+    }
     while (date.getMonth() === month) {
+      if (date.getDate() === 6 && thirty) {
+        return currentMonth;
+      }
       currentMonth.push({
         number: date.getDate(),
         year: date.getFullYear(),
@@ -22,21 +32,5 @@ module.exports = class CalendarMonths {
     return currentMonth;
   }
 
-  createSecondMonth(date, month, dates) {
-    if (month === 12) {
-      month = 0;
-    }
-    const secondMonth = [];
-    while (date.getMonth() === month) {
-      secondMonth.push({
-        number: date.getDate(),
-        year: date.getFullYear(),
-        month: date.getMonth(),
-        day: date.getDay()
-      });
-      date.setDate(date.getDate() + 1);
-    }
-    return secondMonth;
-  }
 
 };

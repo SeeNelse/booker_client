@@ -27,8 +27,8 @@ module.exports = class Events {
     let date = event.date.split('-');
     let currentDate = {
       number: +date[2],
-      month: date[1]-1,
-      year: +date[0]
+      year: +date[0],
+      month: date[1]-1
     }
 
     // Проверки

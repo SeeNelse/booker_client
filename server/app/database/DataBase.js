@@ -86,17 +86,23 @@ module.exports = class DataBase {
   setNewEvent(event, date) {
     if (event.recurrent.status) {
       const calendar = CreateMonths.getCalendar(date.year, date.month);
+      // console.log(1111, calendar);
       if (event.recurrent.type === 'Weekly') {
+
         let recurrentDates = this.getRecurrentsDates(event, date, calendar, 7);
         return this.setRecurrentEvents(event, recurrentDates, date);
+
       } else if (event.recurrent.type === 'Biweekly') {
+
         let recurrentDates = this.getRecurrentsDates(event, date, calendar, 14);
         return this.setRecurrentEvents(event, recurrentDates, date);
+
       } else if (event.recurrent.type === 'Monthly') {
+
         let recurrentDates = this.getRecurrentsDates(event, date, calendar, 'monthly');
         return this.setRecurrentEvents(event, recurrentDates, date);
-      }
 
+      }
     } else {
       let timeCheck = this.newEventTimeCheck(event, date); // Чекаем время на повторение
       return timeCheck.then(param => {
@@ -194,29 +200,31 @@ module.exports = class DataBase {
 
       // Записываем основную запись
       let mainQuery = await this.getNewEventQuery(event, date, "'"+recurrentId+"'");
-      // let mainQueryResult = await this.sendQuery(mainQuery);
-      // if (mainQueryResult.serverStatus !== 2) {
-      //   return false;
-      // }
+      let mainQueryResult = await this.sendQuery(mainQuery);
+      if (mainQueryResult.serverStatus !== 2) {
+        return false;
+      }
       
       // Генерируем квери и записываем записи рекурентов
       let recurrentValues = await this.getCheckAndGenerateQuerys(event, recurrentDates, false);
       let recurrentQuerys = await this.getNewEventRecurrentQuery(recurrentValues);
-      // let recurrentResult = await this.sendQuery(recurrentQuerys);
+      console.log(recurrentValues);
+      let recurrentResult = await this.sendQuery(recurrentQuerys);
 
-      // if (recurrentResult.serverStatus !== 2) {
-      //   return false;
-      // } else {
-      //   return true;
-      // }
+      if (recurrentResult.serverStatus !== 2) {
+        return false;
+      } else {
+        return true;
+      }
     })();
   }
 
   // Генерация дат для рекурентов
   getRecurrentsDates(event, date, calendar, recurrentDays) {
+    // console.log(date);
     let recurrentDates = [];
     calendar.forEach((element, index) => {
-      if (recurrentDays !== 'monthly') {
+      if (recurrentDays !== 'monthly') { // Если через неделю или две
         if (element.month === date.month && element.number === +date.number) {
           let currentDateIndex = index;
           for (let i = -1; i < +event.recurrent['count'+event.recurrent.type]; i++) {
@@ -226,11 +234,29 @@ module.exports = class DataBase {
             currentDateIndex = currentDateIndex + recurrentDays;
           }
         }
-      } else {
-
+      } else { // Если через месяц
+        if (date.month+2 === element.month) {
+          if (calendar[index - 1].month !== element.month) {
+            recurrentDates.push(calendar[index - 1]);
+            if (recurrentDates[0].day === 6) {
+              recurrentDates[0] = calendar[index];
+            }
+            if (recurrentDates[0].day === 0) {
+              recurrentDates[0] = calendar[index + 1];
+            }
+          }
+        }
+        if (element.number === date.number && element.month === date.month + 1) {
+          if (element.day === 6) {
+            recurrentDates = calendar[index + 2];
+          }
+          if (element.day === 0) {
+            calendar[index + 1]
+            recurrentDates = calendar[index + 1];
+          }
+        }
       }
     });
-    console.log(date);
     return recurrentDates;
   }
 
@@ -243,7 +269,6 @@ module.exports = class DataBase {
         await callback(array[index], index, array);
       }
     }
-
     // Проверка на занятое время/генерация значений для запросов
     const checkAndGetQuerys = async (check) => {
       let timeIsBusy = false; // Флаг для проверки на время
