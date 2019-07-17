@@ -5,9 +5,16 @@
 //   database : 'GCWBkOzvMb',
 // };
 
+// module.exports = {
+//   host     : 'localhost',
+//   user     : 'root',
+//   password : '',
+//   database : 'booker',
+// };
+
 module.exports = {
   host     : 'localhost',
-  user     : 'root',
-  password : '',
-  database : 'booker',
+  user     : 'user8',
+  password : 'user8',
+  database : 'user8',
 };

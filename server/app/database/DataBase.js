@@ -38,27 +38,6 @@ module.exports = class DataBase {
 
   // Получаем все ивенты месяца
   getEventsForThisMonth(params) {
-    // let query = `
-    // SELECT 
-    //   booker_event.event_id,
-    //   booker_event.time_start,
-    //   booker_event.time_end,
-    //   booker_event.note,
-    //   booker_event.year,
-    //   booker_event.day,
-    //   booker_event.month,
-    //   booker_event.recurrent_type,
-    //   booker_event.recurrent_id,
-    //   booker_event.user_id,
-
-    //   booker_rooms.room_name
-    // FROM booker_event
-
-    // INNER JOIN booker_rooms
-    // ON booker_event.room_id = booker_rooms.room_id
-    // WHERE year = '${params.year}' AND month = '${params.month}'`;
-
-    // Нормальный запрос, использовать в итоге ЕГО!!!!!!
     let query = `
     SELECT 
       booker_event.event_id,
@@ -100,7 +79,6 @@ module.exports = class DataBase {
 
         let recurrentDates = this.getRecurrentsDates(event, date, calendar, 'monthly');
         return this.setRecurrentEvents(event, recurrentDates, date);
-
       }
     } else {
       let timeCheck = this.newEventTimeCheck(event, date); // Чекаем время на повторение
@@ -200,6 +178,7 @@ module.exports = class DataBase {
       // Записываем основную запись
       let mainQuery = await this.getNewEventQuery(event, date, "'"+recurrentId+"'");
       let mainQueryResult = await this.sendQuery(mainQuery);
+
       if (mainQueryResult.serverStatus !== 2) {
         return false;
       }
@@ -207,6 +186,10 @@ module.exports = class DataBase {
       // Генерируем квери и записываем записи рекурентов
       let recurrentValues = await this.getCheckAndGenerateQuerys(event, recurrentDates, false);
       let recurrentQuerys = await this.getNewEventRecurrentQuery(recurrentValues);
+<<<<<<< HEAD
+=======
+      console.log(123, recurrentValues);
+>>>>>>> 30cb38fb66b2f28777964c0553f3229e69e0fb9e
       let recurrentResult = await this.sendQuery(recurrentQuerys);
 
       if (recurrentResult.serverStatus !== 2) {
@@ -301,6 +284,7 @@ module.exports = class DataBase {
     }
     return (async () => {
       let eventForThisMonth = await this.getEventsForThisDay(date);
+      console.log(123123123, eventForThisMonth)
       if (!eventForThisMonth.length) {
         return true;
       }

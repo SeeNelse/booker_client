@@ -24,14 +24,14 @@ module.exports = class Events {
   // Записываем новые значения в базу
   setNewEvent(data) {
     let event = JSON.parse(Object.keys(data)[0]);
+
     let date = event.date.split('-');
     let currentDate = {
       number: +date[2],
       year: +date[0],
-      month: date[1]-1
+      month: date[1]-1 
     }
-
-    // Проверки
+    // Проверки 
     if (!event.room) {
       return false;
     }
@@ -39,7 +39,7 @@ module.exports = class Events {
     if (!event.date) {
       return false;
     }
-
+ 
     if (event.startTime >= event.endTime) {
       return false;
     }
@@ -47,12 +47,13 @@ module.exports = class Events {
     if (event.note.length > 250) {
       return false;
     }
-    
+
     let minTimes = this.timeToMin(event);
     if (minTimes.startTimeMin < 480 || minTimes.endTimeMin > 1200) {
+      console.log(minTimes);
       return false;
     }
-   
+
     if (
       event.recurrent.type === 'Weekly' && event.recurrent.countWeekly < 1 || 
       event.recurrent.type === 'Weekly' && event.recurrent.countWeekly > 4 ||

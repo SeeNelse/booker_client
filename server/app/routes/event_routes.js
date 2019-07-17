@@ -19,6 +19,7 @@ module.exports = function(app) {
     queryResult
       .then(ViewResult => View.getData(ViewResult, request.params.format))
       .then(result => {
+        console.log(result);
         if (result.length) {
           response.status(HttpStatus.OK).send(result)
         } else {
@@ -29,16 +30,15 @@ module.exports = function(app) {
   });
 
   // Записываем новые значения в базу
-  app.post('/api/event/new/:format?', (request, response) => {
+  app.post('/api/event/new/:format?', (request, response) => { 
     console.log('*****************************************************************');
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
     let queryNewEvent = Events.setNewEvent(request.body);
-    console.log('RESULT TO FRONT' ,queryNewEvent);// Проверка если пришел false, тру не будет, т.к. приходит только промис
-    if (queryNewEvent === undefined) {
+    console.log('RESULT TO FRONT', queryNewEvent);// Проверка если пришел false, тру не будет, т.к. приходит только промис
+    if (queryNewEvent === undefined || queryNewEvent === false) {
       return 'NOPE, UNDEF';
-    }
+    } 
     queryNewEvent.then(result => {
       console.log('END ***********', result);
       if (result) {
