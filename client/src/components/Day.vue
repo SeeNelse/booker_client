@@ -41,7 +41,7 @@ export default {
   methods: {
     scrollHanle(evt) {
       console.log(evt)
-    },
+    }, 
     getEvents() {
       if (!this.day.scanned && this.day.events.length) {
         this.day.events.forEach(element => {

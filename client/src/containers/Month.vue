@@ -37,6 +37,7 @@ import DaysOfWeek from '@/components/DaysOfWeek';
 import NewEvent from '@/components/NewEvent';
 import SelectedEvent from '@/components/SelectedEvent';
 import store from '@/Store';
+import serverUrl from '@/config';
 
 export default {
   name: 'Month',
@@ -63,7 +64,7 @@ export default {
   methods: {
     // Функция ивентов на текущий месяц
     getEventsForThisMonth() {
-      fetch(`http://localhost:8000/api/event/${this.getYear}/${this.getMonth}`)
+      fetch(`${serverUrl}/api/event/${this.getYear}/${this.getMonth}`)
         .then(response => response.json())
         .then(json => {
           if (json.status === 404) {

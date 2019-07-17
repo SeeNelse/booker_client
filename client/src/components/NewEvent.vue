@@ -146,6 +146,7 @@
 <script>
 import store from '@/Store';
 import axios from 'axios';
+import serverUrl from '@/config';
 
 
 export default {
@@ -253,9 +254,9 @@ export default {
       } else {
         this.errors.note = false;
       }
-     
+     console.log(this.newEventForm)
       const eventDataForDB = JSON.stringify(this.newEventForm);
-      axios.post('http://localhost:8000/api/event/new', eventDataForDB)
+      axios.post(`${serverUrl}/api/event/new`, eventDataForDB)
         .then((response) => {
           if (response.status === 200) {
             this.eventSuccess = true;

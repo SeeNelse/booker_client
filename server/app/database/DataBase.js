@@ -86,7 +86,6 @@ module.exports = class DataBase {
   setNewEvent(event, date) {
     if (event.recurrent.status) {
       const calendar = CreateMonths.getCalendar(date.year, date.month);
-      // console.log(1111, calendar);
       if (event.recurrent.type === 'Weekly') {
 
         let recurrentDates = this.getRecurrentsDates(event, date, calendar, 7);
@@ -208,7 +207,6 @@ module.exports = class DataBase {
       // Генерируем квери и записываем записи рекурентов
       let recurrentValues = await this.getCheckAndGenerateQuerys(event, recurrentDates, false);
       let recurrentQuerys = await this.getNewEventRecurrentQuery(recurrentValues);
-      console.log(recurrentValues);
       let recurrentResult = await this.sendQuery(recurrentQuerys);
 
       if (recurrentResult.serverStatus !== 2) {
@@ -221,7 +219,6 @@ module.exports = class DataBase {
 
   // Генерация дат для рекурентов
   getRecurrentsDates(event, date, calendar, recurrentDays) {
-    // console.log(date);
     let recurrentDates = [];
     calendar.forEach((element, index) => {
       if (recurrentDays !== 'monthly') { // Если через неделю или две
