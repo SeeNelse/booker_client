@@ -1,31 +1,41 @@
 <template>
   <fragment>
-    <div class="calendar">
-      <div class="calendar__controller">
-        <b-button class="calendar__prev calendar__btn" variant="outline-info" @click="slideMonth(false)"><font-awesome-icon icon='chevron-left'/></b-button>
-        <span class="calendar__mouth">{{currentMonthName()}} {{ getYear }}</span>
-        <b-button class="calendar__next calendar__btn" variant="outline-info" @click="slideMonth(true)"><font-awesome-icon icon='chevron-right'/></b-button>
-      </div>
-      <div class="calendar__top">
-        <DaysOfWeek v-for='(item, index) in daysName' :item='item' :key='index'></DaysOfWeek>
-      </div>
-      <div class="calendar__body">
-        <Week 
-          v-for='(week, index) in getCurrentMonthDays' 
-          :key='index' 
-          :week='week' 
-          :modalNewEventHandler='modalNewEventHandler'
-          :modalEventHandler='modalEventHandler'
-        />
-      </div>
-    </div>
+    <b-row>
+      <b-col cols="3">
+        <SideBar :roomList='roomList' />
+        <SelectedEvent :selectedEventsObj='selectedEventsObj' />
+      </b-col>
+      <b-col cols="9">
+        <div class="calendar">
+          <div class="calendar__controller">
+            <b-button class="calendar__prev calendar__btn" variant="outline-info" @click="slideMonth(false)"><font-awesome-icon icon='chevron-left'/></b-button>
+            <span class="calendar__mouth">{{currentMonthName()}} {{ getYear }}</span>
+            <b-button class="calendar__next calendar__btn" variant="outline-info" @click="slideMonth(true)"><font-awesome-icon icon='chevron-right'/></b-button>
+          </div>
+          <div class="calendar__top">
+            <DaysOfWeek v-for='(item, index) in daysName' :item='item' :key='index'></DaysOfWeek>
+          </div>
+          <div class="calendar__body">
+            <Week 
+              v-for='(week, index) in getCurrentMonthDays' 
+              :key='index' 
+              :week='week' 
+              :modalNewEventHandler='modalNewEventHandler'
+              :windowEventHandler='windowEventHandler'
+              :selectRoomsValue='selectRoomsValue'
+            />
+          </div>
+        </div>
+      </b-col>
+    </b-row>
 
     <b-modal id="newEvent" title="Book room" hide-footer>
-      <NewEvent :currentDate='currentDate()' :getEventsForThisMonth='getEventsForThisMonth' :dayOnClick='dayOnClick'/>
-    </b-modal>
-
-    <b-modal id="selectedEvent" title="Event" hide-footer>
-      <SelectedEvent :selectedEventObj='selectedEventObj' />
+      <NewEvent 
+        :roomList='roomList' 
+        :currentDate='currentDate()' 
+        :getEventsForThisMonth='getEventsForThisMonth' 
+        :dayOnClick='dayOnClick'
+      />
     </b-modal>
 
   </fragment>
@@ -36,8 +46,10 @@ import Week from '@/components/Week';
 import DaysOfWeek from '@/components/DaysOfWeek';
 import NewEvent from '@/components/NewEvent';
 import SelectedEvent from '@/components/SelectedEvent';
+import SideBar from '@/components/SideBar';
 import store from '@/Store';
 import serverUrl from '@/config';
+import axios from 'axios';
 
 export default {
   name: 'Month',
@@ -45,33 +57,51 @@ export default {
     Week, 
     DaysOfWeek,
     NewEvent,
-    SelectedEvent
+    SelectedEvent,
+    SideBar,
   },
   data() {
     return {
       getMonth: this.getCurrentMonthNumber(),
       getYear: this.getCurrentYear(),
-      daysName: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+      mondayStart: false,
       monthsName: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       dayOnClick: {},
       eventForThisMonth: [],
-      selectedEventObj: {}
+      selectedEventsObj: {},
+      roomList: []
     }
   },
   created() {
     this.getEventsForThisMonth();
+    this.getRoomNames();
   },
   methods: {
-    // Функция ивентов на текущий месяц
+    // фетч ивентов на текущий месяц
     getEventsForThisMonth() {
-      fetch(`${serverUrl}/api/event/${this.getYear}/${this.getMonth}`)
-        .then(response => response.json())
-        .then(json => {
-          if (json.status === 404) {
+      axios.get(`${serverUrl}/api/event/${this.getYear}/${this.getMonth}`)
+        .then(response => {
+          if (response.status === 404) {
             this.eventForThisMonth = [];
             return false;
           }
-          this.eventForThisMonth = json;
+          this.eventForThisMonth = response.data;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+
+    // стягиваем комнаты
+    getRoomNames() {
+      axios.get(`${serverUrl}/api/rooms/get/`)
+        .then(response => {
+          if (response.data.length) {
+            this.roomList = response.data;
+          }
+        })
+        .catch(error => {
+          console.log(error);
         });
     },
 
@@ -95,9 +125,9 @@ export default {
       }
     },
 
-    modalEventHandler(event) {
-      this.selectedEventObj = event;
-      this.$bvModal.show('selectedEvent');
+    // окно ивентов
+    windowEventHandler(event) {
+      this.selectedEventsObj = event;
     },
     
     // логика календаря
@@ -123,6 +153,7 @@ export default {
 
     // перелистывание календаря
     slideMonth(next) {
+      this.eventForThisMonth = [];
       if (next) {
         if (this.getMonth > 10) {
           this.getMonth = 0;
@@ -150,17 +181,39 @@ export default {
       let date = new Date(year, month);
       let monthDays = [];
       while (date.getMonth() === month) {
-        monthDays[date.getDate()-1] = {
-          number: date.getDate(),
-          day: this.daysName[date.getDay() - 1] ? date.getDay() - 1 : 6,
-          presentDay: date.getDate() === currentDate.getDate() && 
-                    month === currentDate.getMonth() && 
-                    year === currentDate.getFullYear() ? true : false,
-          month: month,
-          year: year,
-          events: [],
-          scanned: false
-        };
+        if (this.mondayStart) {
+          monthDays[date.getDate()-1] = {
+            number: date.getDate(),
+            day: date.getDay(),
+            presentDay: date.getDate() === currentDate.getDate() && 
+                      month === currentDate.getMonth() && 
+                      year === currentDate.getFullYear() ? true : false,
+            month: month,
+            year: year,
+            events: [],
+            scanned: false
+          };
+        } else {
+          monthDays[date.getDate()-1] = {
+            number: date.getDate(),
+            day: this.daysName[date.getDay() - 1] ? date.getDay() - 1 : 6,
+            presentDay: date.getDate() === currentDate.getDate() && 
+                      month === currentDate.getMonth() && 
+                      year === currentDate.getFullYear() ? true : false,
+            month: month,
+            year: year,
+            events: [],
+            scanned: false
+          };
+        }
+        // monthDays[date.getDate()-1] = {
+        //   number: date.getDate(),
+        //   day: this.daysName[date.getDay() - 1] ? date.getDay() - 1 : 6,
+        //   presentDay: date.getDate() === currentDate.getDate() && 
+        //             month === currentDate.getMonth() && 
+        //             year === currentDate.getFullYear() ? true : false,
+          
+        // };
         monthDays[date.getDate()-1].fullDate = monthDays[date.getDate()-1].year + '-' + // строка в виде "yyyy-mm-dd"
           (monthDays[date.getDate()-1].month < 10 ? '0' + monthDays[date.getDate()-1].month : monthDays[date.getDate()-1].month) + '-' + 
           (monthDays[date.getDate()-1].number < 10 ? '0' + monthDays[date.getDate()-1].number : monthDays[date.getDate()-1].number);
@@ -205,8 +258,14 @@ export default {
       
       for (let key in currentMonth) {
         result.push(currentMonth[key]);
-        if (currentMonth[key].day === 5 || currentMonth[key].day === 6) {
-          currentMonth[key].weekend = true;
+        if (this.mondayStart) {
+          if (currentMonth[key].day === 0 || currentMonth[key].day === 6) {
+            currentMonth[key].weekend = true;
+          }
+        } else {
+          if (currentMonth[key].day === 5 || currentMonth[key].day === 6) {
+            currentMonth[key].weekend = true;
+          }
         }
       }
 
@@ -259,6 +318,24 @@ export default {
     getCurrentMonthDays() {
       return this.createCurrentMonth(this.getYear, this.getMonth);
     },
+
+    daysName() {
+      this.eventForThisMonth = [];
+      this.getEventsForThisMonth();
+      if (store.getters.startDay) {
+        this.mondayStart = true;
+        return ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+      } else {
+        this.mondayStart = false;
+        return ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+      }
+    },
+
+    selectRoomsValue: {
+      get () {
+        return store.state.selectRoomsValue
+      },
+    },
   },
   watch: {
     // стягиваем ивенты при листании календаря
@@ -278,7 +355,10 @@ export default {
     font-size: 24px;
   }
   .calendar__top {
-    margin: 10px 0;
+    background: #17a2b8;
+    margin-top: 10px;
+    padding: 10px 0;
+    color: #ffffff;
     display: flex;
     flex-direction: row;
     justify-content: center;

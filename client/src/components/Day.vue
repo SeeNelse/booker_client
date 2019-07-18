@@ -2,21 +2,29 @@
   <div 
     class="calendar__day"
     :class="{ 
-    'calendar__grey': day.gray, 
-    'calendar__current': day.presentDay, 
-    'calendar__weekend' : day.weekend }"
+      'calendar__grey': day.gray, 
+      'calendar__current': day.presentDay, 
+      'calendar__weekend' : day.weekend 
+    }"
   >
     <div class="calendar__day-handler" v-on:click="modalNewEventHandler(day)"></div>
     <span class="calendar__day-nubmer">
       {{ day.number }}
     </span>
-
-    <div v-if='getEvents().length'>
-      <!-- <vue-custom-scrollbar class="scroll-area" :settings="settings" @ps-scroll-y="scrollHanle"> -->
-        <div v-for='event in getEvents()' >
-          <b-badge class="calendar__day-event" variant="dark" v-on:click="modalEventHandler(event)">{{event.time_start}} - {{event.time_end}}</b-badge>
-        </div>
-      <!-- </vue-custom-scrollbar> -->
+    
+    <div v-if='getEvents'>
+      <div v-for='(event, roomName) in getEvents'>
+        <b-badge 
+          class="calendar__day-event" 
+          :class="{
+            'calendar__day-event-red': roomName === 'red',
+            'calendar__day-event-blue': roomName === 'blue',
+            'calendar__day-event-green': roomName === 'green'
+          }"
+          variant="dark" 
+          v-on:click="windowEventHandler(event)"
+        />
+      </div>
     </div>
     
   </div>
@@ -27,56 +35,57 @@ import vueCustomScrollbar from 'vue-custom-scrollbar'
 export default {
   name: 'Day',
   components: {
-    vueCustomScrollbar
   },
-  props: ['day', 'modalNewEventHandler', 'modalEventHandler'],
+  props: ['day', 'modalNewEventHandler', 'windowEventHandler', 'selectRoomsValue'],
   data() {
     return {
-      settings: {
-        maxScrollbarLength: 20,
-        suppressScrollY: true
+
+    }
+  },
+  computed: {
+    getEvents() {
+      let dayEvents = {};
+      if (!this.day.scanned && this.day.events.length) {
+        this.day.events.forEach(element => {
+          if (!dayEvents[element.room_name]) {
+            dayEvents[element.room_name] = [];
+          }
+          dayEvents[element.room_name].push(element);
+        });
+        this.day.scanned = true;
+        return dayEvents;
       }
     }
   },
   methods: {
-    scrollHanle(evt) {
-      console.log(evt)
-    }, 
-    getEvents() {
-      if (!this.day.scanned && this.day.events.length) {
-        this.day.events.forEach(element => {
-          let startTime = new Date(element.time_start);
-          let startFullTime = (startTime.getHours() < 10 ? '0' + startTime.getHours() : startTime.getHours()) 
-            + ':' + (startTime.getMinutes() == 0 ? startTime.getMinutes() + '0' : startTime.getMinutes());
-          element.time_start = startFullTime;
 
-          let endTime = new Date(element.time_end);
-          let endFullTime = (endTime.getHours() < 10 ? '0' + endTime.getHours() : endTime.getHours()) 
-            + ':' + (endTime.getMinutes() == 0 ? endTime.getMinutes() + '0' : endTime.getMinutes());
-          
-          element.time_end = endFullTime;
-        });
-        this.day.scanned = true;
-      }
-      return this.day.events;
-    }
   },
 }
 </script>
 
 <style>
+  .calendar__row {
+    width: 100%;
+  }
   .calendar__day {
-    width: 130px;
+    width: 14.285714%;
     height: 130px;
     position: relative;
     cursor: pointer;
-    background: #17a2b8;
-    margin: 0.5px;
-    border: 0.5px solid #ffffff;
     transition: .3s;
     padding-left: 5px;
     padding-top: 5px;
-    /* overflow: hidden; */
+    border-right: 1px solid #d4d4d4;
+    border-bottom: 1px solid #d4d4d4;
+  }
+  .calendar__day:first-child {
+    border-left: 1px solid #d4d4d4;
+  }
+  .calendar__row:first-child {
+    border-top: 1px solid #d4d4d4;
+  }
+  .calendar__day:hover {
+    background: #afe2ea;
   }
   .calendar__day-handler {
     position: absolute;
@@ -89,12 +98,21 @@ export default {
   .calendar__day-event {
     z-index: 2;
     position: relative;
+    width: 45px;
+    height: 25px;
+    display: inline-block !important;
+  }
+  .calendar__day-event-red {
+    background-color: #ea6c78 !important;
+  }
+  .calendar__day-event-blue {
+    background-color: #4197f3 !important;
+  }
+  .calendar__day-event-green {
+    background-color: #4fc369 !important;
   }
   .calendar__day-event:hover {
-    background-color: #505050;
-  }
-  .calendar__day:hover {
-    transform: scale(1.02);
+    box-shadow: inset 0px 0px 77px -30px rgba(0,0,0,0.45);
   }
   .calendar__day-nubmer {
     position: absolute;
@@ -102,18 +120,28 @@ export default {
     right: 10px;
   }
   .calendar__weekend {
-    background: #dc3545;
+    background: #e6f8fb;
     cursor: not-allowed;
+  }
+  .calendar__weekend:hover {
+    background: #e6f8fb;
   }
   .calendar__grey {
-    background: #bcbfc1;
     cursor: not-allowed;
+    color: #d4d4d4;
   }
-  .calendar__current {
-    border: 4px solid red;
+  .calendar__grey:hover {
+    background: #ffffff;
   }
-  .calendar__weekend.calendar__current {
-    border: 4px solid #888585;
+  .calendar__current::after {
+    border: 2px solid #17a2b8;
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
   }
   .calendar__current .calendar__day-nubmer {
     right: 7px;
@@ -122,7 +150,6 @@ export default {
   .scroll-area {
     position: relative;
     margin: auto;
-     /* width: 600px; */
     height: 400px; 
   }
 </style>

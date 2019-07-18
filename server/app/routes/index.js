@@ -1,6 +1,7 @@
-const noteRoutes = require('./event_routes');
+const eventRoutes = require('./event_routes');
+const roomsRoutes = require('./rooms_routes');
 
 module.exports = function(app) {
-  noteRoutes(app);
-  // Тут, позже, будут и другие обработчики маршрутов 
+  roomsRoutes(app);
+  eventRoutes(app);
 };

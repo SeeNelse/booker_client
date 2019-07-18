@@ -24,7 +24,7 @@
         </b-collapse>
       </b-container>
     </b-navbar>
-    <b-container class="bv-example-row">
+    <b-container  class="bv-example-row">
       <router-view/> 
     </b-container>
   </div>

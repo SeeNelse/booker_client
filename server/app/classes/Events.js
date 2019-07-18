@@ -1,5 +1,5 @@
-const DataBaseClass = require('../database/DataBase');
-DataBase = new DataBaseClass();
+const EventsDBClass = require('../database/EventsDB');
+const EventsDB = new EventsDBClass();
 
 module.exports = class Events {
 
@@ -15,7 +15,7 @@ module.exports = class Events {
       params.year.length === 4 &&
       params.month.length <= 2
     ) {
-      return DataBase.getEventsForThisMonth(params);
+      return EventsDB.getEventsForThisMonth(params);
     } else {
       return false;
     }
@@ -24,13 +24,13 @@ module.exports = class Events {
   // Записываем новые значения в базу
   setNewEvent(data) {
     let event = JSON.parse(Object.keys(data)[0]);
-
     let date = event.date.split('-');
     let currentDate = {
       number: +date[2],
       year: +date[0],
       month: date[1]-1 
     }
+    
     // Проверки 
     if (!event.room) {
       return false;
@@ -50,7 +50,6 @@ module.exports = class Events {
 
     let minTimes = this.timeToMin(event);
     if (minTimes.startTimeMin < 480 || minTimes.endTimeMin > 1200) {
-      console.log(minTimes);
       return false;
     }
 
@@ -64,14 +63,16 @@ module.exports = class Events {
       return false;
     }
 
-    return DataBase.setNewEvent(event, currentDate);
+    return EventsDB.setNewEvent(event, currentDate);
   }
   
 
   // Время ивента в минуты
-  timeToMin(event) {
+  timeToMin(event) { // СЮДА ЧТО-ТО НАДО БУДЕТ ДОПИСАТЬ
     let startTime = new Date(event.startTime);
     let endTime = new Date(event.endTime);
+    console.log(1, event.startTime)
+    console.log(2, startTime);
     let objTimes = {
       startTimeMin: startTime.getHours() * 60 + startTime.getMinutes(),
       endTimeMin: endTime.getHours() * 60 + endTime.getMinutes()

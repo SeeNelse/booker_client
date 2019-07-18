@@ -19,11 +19,10 @@ module.exports = function(app) {
     queryResult
       .then(ViewResult => View.getData(ViewResult, request.params.format))
       .then(result => {
-        console.log(result);
         if (result.length) {
           response.status(HttpStatus.OK).send(result)
         } else {
-          response.status(HttpStatus.NOT_FOUND).send(View.getData(Errors.nomFound(), request.params.format))
+          response.status(HttpStatus.NOT_FOUND).send(View.getData(Errors.notFound(), request.params.format))
         }
       });
     
@@ -37,14 +36,13 @@ module.exports = function(app) {
     let queryNewEvent = Events.setNewEvent(request.body);
     console.log('RESULT TO FRONT', queryNewEvent);// Проверка если пришел false, тру не будет, т.к. приходит только промис
     if (queryNewEvent === undefined || queryNewEvent === false) {
-      return 'NOPE, UNDEF';
+      response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
     } 
     queryNewEvent.then(result => {
-      console.log('END ***********', result);
       if (result) {
         response.status(HttpStatus.OK).send(result);
       } else {
-        response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.nomFound(), request.params.format));
+        response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
       }
     });
   });
@@ -88,7 +86,6 @@ module.exports = function(app) {
 
 
   app.get('/*?', (req, res) => {
-    console.log(req);
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.send('404');

@@ -5,7 +5,8 @@
       :key='index' 
       :day='day' 
       :modalNewEventHandler='modalNewEventHandler' 
-      :modalEventHandler='modalEventHandler'
+      :windowEventHandler='windowEventHandler'
+      :selectRoomsValue='selectRoomsValue'
     />
   </div>
 </template>
@@ -18,7 +19,7 @@ import Day from './Day';
     components: {
       Day
     },
-    props: ['week', 'modalNewEventHandler', 'modalEventHandler'],
+    props: ['week', 'modalNewEventHandler', 'windowEventHandler', 'selectRoomsValue'],
     created() {
       // console.log('here', this.eventForThisMonth());
     }

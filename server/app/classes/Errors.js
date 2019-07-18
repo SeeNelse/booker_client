@@ -1,6 +1,6 @@
 module.exports = class Errors {
 
-  nomFound() {
+  notFound() {
     return {
       status: 404,
       statusText: 'Not found'

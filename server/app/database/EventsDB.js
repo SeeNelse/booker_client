@@ -1,6 +1,4 @@
-const dbData = require('../../config/config');
-const mysql = require('mysql');
-const pool  = mysql.createPool(dbData);
+const sendQuery = require('./sendQuery');
 
 const CreateMonthsClass = require('../helpers/CreateMonths');
 const CreateMonths = new CreateMonthsClass();
@@ -11,30 +9,30 @@ module.exports = class DataBase {
     
   }
 
-  sendQuery(query) {
-    return new Promise((resolve, reject) => {
-      pool.getConnection(function(err, connection) {
-        if (err) throw err;
-        connection.query(query, function (error, results, fields) {
-          connection.release();
-          if (error) throw error;
-          resolve(results);
-        });
-      });
+  // sendQuery(query) {
+  //   return new Promise((resolve, reject) => {
+  //     pool.getConnection(function(err, connection) {
+  //       if (err) throw err;
+  //       connection.query(query, function (error, results, fields) {
+  //         connection.release();
+  //         if (error) throw error;
+  //         resolve(results);
+  //       });
+  //     });
 
 
-    //   this.mysqlServer = mysql.createConnection(dbData);
-    //   this.mysqlServer.query(query, (error, result) => {
-    //     if (error) {
-    //       resolve(false);
-    //     }
-    //     this.mysqlServer.end(error => {
-    //       resolve(result);
-    //     });
-    //   });
-    });
+  //   //   this.mysqlServer = mysql.createConnection(dbData);
+  //   //   this.mysqlServer.query(query, (error, result) => {
+  //   //     if (error) {
+  //   //       resolve(false);
+  //   //     }
+  //   //     this.mysqlServer.end(error => {
+  //   //       resolve(result);
+  //   //     });
+  //   //   });
+  //   });
     
-  }
+  // }
 
   // Получаем все ивенты месяца
   getEventsForThisMonth(params) {
@@ -50,6 +48,7 @@ module.exports = class DataBase {
       booker_event.recurrent_type,
       booker_event.recurrent_id,
       booker_event.user_id,
+      booker_event.room_id,
       booker_users.user_name,
       booker_rooms.room_name
     FROM booker_event
@@ -58,7 +57,7 @@ module.exports = class DataBase {
     INNER JOIN booker_rooms
     ON booker_event.room_id = booker_rooms.room_id
     WHERE year = '${params.year}' AND month = '${params.month}'`;
-    return this.sendQuery(query);
+    return sendQuery(query);
   }
 
   // Записываем новый ивент
@@ -86,7 +85,7 @@ module.exports = class DataBase {
         if (param) {
           return (async () => {
             let query = await this.getNewEventQuery(event, date);
-            return this.sendQuery(query);
+            return sendQuery(query);
           })();
         } else {
           return false;
@@ -98,11 +97,12 @@ module.exports = class DataBase {
   // Генерация запроса для одной записи
   getNewEventQuery(event, date, recurrentId = null) {
     return (async () => {
-      let roomId = await this.getRoomId(event.room);
+      console.log(event);
+      // let roomId = await this.getRoomId(event.room);
       return `INSERT INTO booker_event 
         (note, time_start, time_end, year, day, month, user_id, room_id, recurrent_type, recurrent_id) 
         VALUES ('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', 
-        '${date.number}', '${date.month}', '1', '${roomId[0].room_id}', false, ${recurrentId});`;
+        '${date.number}', '${date.month}', '1', '${event.room}', false, ${recurrentId});`;
     })();
   }
   
@@ -124,18 +124,18 @@ module.exports = class DataBase {
   }
 
   // Генерация запроса для апдейта
-  getUpdateEventQuery(event, date, recurrentId = null) {
-    return (async () => {
-      let roomId = await this.getRoomId(event.room);
-      return `INSERT INTO booker_event 
-        (note, time_start, time_end, year, day, month, user_id, room_id, recurrent_type, recurrent_id) 
-        VALUES ('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', 
-        '${date.number}', '${date.month}', '1', '${roomId[0].room_id}', false, ${recurrentId});`;
-    })();
-  }
+  // getUpdateEventQuery(event, date, recurrentId = null) {
+  //   return (async () => {
+  //     let roomId = await this.getRoomId(event.room);
+  //     return `INSERT INTO booker_event 
+  //       (note, time_start, time_end, year, day, month, user_id, room_id, recurrent_type, recurrent_id) 
+  //       VALUES ('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', 
+  //       '${date.number}', '${date.month}', '1', '${roomId[0].room_id}', false, ${recurrentId});`;
+  //   })();
+  // }
 
   // Генерация запроса для проверки ивентов в нужную дату
-  getEventsForThisDay(date) {
+  getEventsForThisDay(date, event) {
     let query = `
     SELECT 
       booker_event.time_start,
@@ -144,14 +144,19 @@ module.exports = class DataBase {
       booker_event.day,
       booker_event.month
     FROM booker_event
-    WHERE year = '${date.year}' AND month = '${date.month}' AND day = '${date.number}'`;
-    return this.sendQuery(query); 
+    INNER JOIN booker_rooms
+    ON booker_event.room_id = booker_rooms.room_id
+    WHERE booker_event.year = '${date.year}' 
+    AND booker_event.month = '${date.month}' 
+    AND booker_event.day = '${date.number}'
+    AND booker_rooms.room_id = ${event.room} `;
+    return sendQuery(query); 
   }
 
   // Генерация запрос для получения айди комнаты
   getRoomId(name) {
     let query = `SELECT room_id FROM booker_rooms WHERE room_name = '${name}'`
-    return this.sendQuery(query);
+    return sendQuery(query);
   }
 
   // Запись ивентов с рекурентами.
@@ -165,7 +170,7 @@ module.exports = class DataBase {
 
       // Забираем последний айди для вычисления айди рекурентов
       let lastIdQuery = 'SELECT MAX(event_id) FROM booker_event;'
-      let currentId = await this.sendQuery(lastIdQuery);
+      let currentId = await sendQuery(lastIdQuery);
       currentId = currentId[0]['MAX(event_id)'] + 1;
       
       // собираем айди рекурентов
@@ -177,7 +182,7 @@ module.exports = class DataBase {
 
       // Записываем основную запись
       let mainQuery = await this.getNewEventQuery(event, date, "'"+recurrentId+"'");
-      let mainQueryResult = await this.sendQuery(mainQuery);
+      let mainQueryResult = await sendQuery(mainQuery);
 
       if (mainQueryResult.serverStatus !== 2) {
         return false;
@@ -186,11 +191,7 @@ module.exports = class DataBase {
       // Генерируем квери и записываем записи рекурентов
       let recurrentValues = await this.getCheckAndGenerateQuerys(event, recurrentDates, false);
       let recurrentQuerys = await this.getNewEventRecurrentQuery(recurrentValues);
-<<<<<<< HEAD
-=======
-      console.log(123, recurrentValues);
->>>>>>> 30cb38fb66b2f28777964c0553f3229e69e0fb9e
-      let recurrentResult = await this.sendQuery(recurrentQuerys);
+      let recurrentResult = await sendQuery(recurrentQuerys);
 
       if (recurrentResult.serverStatus !== 2) {
         return false;
@@ -228,11 +229,11 @@ module.exports = class DataBase {
         }
         if (element.number === date.number && element.month === date.month + 1) {
           if (element.day === 6) {
-            recurrentDates = calendar[index + 2];
+            recurrentDates.push(calendar[index + 2]);
           }
           if (element.day === 0) {
             calendar[index + 1]
-            recurrentDates = calendar[index + 1];
+            recurrentDates.push(calendar[index + 1]);
           }
         }
       }
@@ -283,8 +284,7 @@ module.exports = class DataBase {
       endTimeMin: endTime.getHours() * 60 + endTime.getMinutes()
     }
     return (async () => {
-      let eventForThisMonth = await this.getEventsForThisDay(date);
-      console.log(123123123, eventForThisMonth)
+      let eventForThisMonth = await this.getEventsForThisDay(date, event);
       if (!eventForThisMonth.length) {
         return true;
       }

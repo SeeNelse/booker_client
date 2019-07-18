@@ -6,12 +6,13 @@
         label="Select room:*"
         label-for="newEvent-select-room"
       >
-        <b-form-select id="newEvent-select-room" v-model="newEventForm.room" required>
+        <!-- <b-form-select id="newEvent-select-room" v-model="newEventForm.room" required>
           <option :value='null'>Please select</option>
           <option value="red">Room Red</option>
           <option value="blue">Room Bue</option>
           <option value="green">Room Green</option>
-        </b-form-select>
+        </b-form-select> -->
+        <b-form-select v-model="newEventForm.room" :options="roomstList" class='sidebar__select'></b-form-select>
       </b-form-group>
 
       <b-alert show variant="danger" v-if='errors.room'>Select room please</b-alert>
@@ -135,7 +136,7 @@
         <b-alert show variant="danger" v-if='errors.reccurent'>Incorrect value</b-alert>
       </div>
 
-      <b-button type="submit" variant="primary">Submit</b-button>
+      <b-button type="submit" variant="info">Submit</b-button>
       <b-alert show variant="success" class='calendar__success' v-if='eventSuccess'>You have successfully registered an event</b-alert>
       <b-alert show variant="danger" class='calendar__success' v-if='errors.timeTaken'>This time is already taken</b-alert>
     </b-form>
@@ -151,11 +152,11 @@ import serverUrl from '@/config';
 
 export default {
   name: 'NewEvent',
-  props: ['currentDate', 'dayOnClick', 'getEventsForThisMonth'],
+  props: ['currentDate', 'dayOnClick', 'getEventsForThisMonth', 'roomList'],
   data() {
     return {
       newEventForm: {
-        room: 'red',
+        room: null,
         date: '',
         startTime: new Date('Jan 01 1970 08:00:00'),
         endTime: new Date('Jan 01 1970 09:00:00'),
@@ -188,6 +189,7 @@ export default {
     this.newEventForm.date = this.currentDate;
   },
   methods: {
+
     newEventSubmit(event) {
       event.preventDefault();
       
@@ -254,7 +256,9 @@ export default {
       } else {
         this.errors.note = false;
       }
-     console.log(this.newEventForm)
+
+      // Присваиваем времени нужную дату
+      console.log(this.newEventForm);
       const eventDataForDB = JSON.stringify(this.newEventForm);
       axios.post(`${serverUrl}/api/event/new`, eventDataForDB)
         .then((response) => {
@@ -265,7 +269,7 @@ export default {
             setTimeout(function() {
               this.eventSuccess = true;
               this.$bvModal.hide('newEvent');
-            }.bind(this), 2000);
+            }.bind(this), 1000);
           }
         })
         .catch((error) => {
@@ -293,7 +297,16 @@ export default {
   computed: {
     format() {
       return this.newEventForm.formatAmPm ? '12' : '24'
-    }
+    },
+    roomstList() {
+      let rooms = [{ value: null, text: 'Please select', disabled: true }];
+      this.roomList.forEach(element => {
+        let roomName = element.room_name;
+        roomName = roomName.charAt(0).toUpperCase() + roomName.substr(1);
+        rooms.push({ value: element.room_id, text: roomName });
+      });
+      return rooms;
+    },
   }
 }
 </script>
