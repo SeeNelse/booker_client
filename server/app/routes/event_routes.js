@@ -37,6 +37,7 @@ module.exports = function(app) {
     console.log('RESULT TO FRONT', queryNewEvent);// Проверка если пришел false, тру не будет, т.к. приходит только промис
     if (queryNewEvent === undefined || queryNewEvent === false) {
       response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
+      return false;
     } 
     queryNewEvent.then(result => {
       if (result) {

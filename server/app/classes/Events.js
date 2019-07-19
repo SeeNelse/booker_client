@@ -49,6 +49,7 @@ module.exports = class Events {
     }
 
     let minTimes = this.timeToMin(event);
+    console.log(1, minTimes.startTimeMin);
     if (minTimes.startTimeMin < 480 || minTimes.endTimeMin > 1200) {
       return false;
     }
@@ -71,8 +72,9 @@ module.exports = class Events {
   timeToMin(event) { // СЮДА ЧТО-ТО НАДО БУДЕТ ДОПИСАТЬ
     let startTime = new Date(event.startTime);
     let endTime = new Date(event.endTime);
-    console.log(1, event.startTime)
-    console.log(2, startTime);
+    console.log(2, event.startTime)
+    console.log(3, startTime, startTime.getHours());
+    console.log(123213213, new Date().toLocaleString());
     let objTimes = {
       startTimeMin: startTime.getHours() * 60 + startTime.getMinutes(),
       endTimeMin: endTime.getHours() * 60 + endTime.getMinutes()
