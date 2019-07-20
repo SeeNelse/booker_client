@@ -18,19 +18,20 @@ INSERT INTO `booker_event` (`event_id`, `note`, `time_start`, `time_end`, `year`
 
 
 
-CREATE TABLE `booker`.`booker_users` ( 
+CREATE TABLE `booker_users` ( 
   `user_id` INT(6) NOT NULL AUTO_INCREMENT , 
   `user_name` VARCHAR(64) NOT NULL , 
   `user_pass` VARCHAR(255) NOT NULL , 
   `user_email` VARCHAR(64) NOT NULL , 
   `status` ENUM('active','not_active') NOT NULL , 
-  `role_id` INT(6) NOT NULL , PRIMARY KEY (`user_id`));
+  `role_id` INT(6) NOT NULL , PRIMARY KEY (`user_id`),
+  `token` VARCHAR(255));
   
-INSERT INTO `booker_users` (`user_id`, `user_name`, `user_pass`, `user_email`, `status`, `role_id`) VALUES (NULL, 'username', '123123123', 'exaple@gmail.com', 'active', '1');
+INSERT INTO `booker_users` (`user_id`, `user_name`, `user_pass`, `user_email`, `status`, `role_id`, `token`) VALUES (NULL, 'username', '123123123', 'exaple@gmail.com', 'active', '1', '123123');
 
 
 
-CREATE TABLE `booker`.`booker_roles` ( 
+CREATE TABLE `booker_roles` ( 
   `role_id` INT(6) NOT NULL AUTO_INCREMENT , 
   `role_name` VARCHAR(64) NOT NULL , PRIMARY KEY (`role_id`));
 

@@ -1,10 +1,10 @@
 const RoomsDBClass = require('../database/RoomsDB');
 const RoomsDB = new RoomsDBClass();
 
-module.exports = class Events {
+module.exports = class Rooms {
 
-  gerRooms() {
-    return RoomsDB.gerRooms();
+  getRooms() {
+    return RoomsDB.getRooms();
   }
 
 }

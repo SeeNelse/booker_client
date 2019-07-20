@@ -53,7 +53,7 @@ module.exports = function(app) {
   // Удаление ивента
 
   // Запись нового ивента в базу
-  // app.post('/api/event/new', (req, res) => {
+  // app.delete('/api/event/new', (req, res) => {
   //   console.log(123123);
   //   res.header("Access-Control-Allow-Origin", "*");
   //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

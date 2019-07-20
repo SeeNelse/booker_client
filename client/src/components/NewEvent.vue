@@ -265,7 +265,7 @@ export default {
             this.errors.timeTaken = false;
             this.getEventsForThisMonth();
             setTimeout(function() {
-              this.eventSuccess = true;
+              this.eventSuccess = false;
               this.$bvModal.hide('newEvent');
             }.bind(this), 1000);
           }

@@ -9,11 +9,11 @@
       }"
     >
       <h4 class='selected-event__head'>{{selectedEventsRoom}} room</h4>
+      <h5 class='selected-event__head'>{{this.selectedEventsObj[0].day}}.{{this.selectedEventsObj[0].month + 1}}.{{this.selectedEventsObj[0].year}}</h5>
       <div v-for='event in selectedEventsObj' class="selected-event__item">
           <h5 class="selected-event__time">{{minToHours(event.time_start)}} - {{minToHours(event.time_end)}}</h5>
           <ul class="selected-event__list">
             <li>{{event.user_name}}</li>
-            <li>{{event.day}}.{{event.month}}.{{event.year}}</li>
             <li v-if='event.note'>{{event.note}}</li>
           </ul>
       </div>
