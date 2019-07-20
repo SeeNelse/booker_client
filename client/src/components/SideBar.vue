@@ -3,7 +3,7 @@
     <h4 class="sidebar__head">Controls</h4>
     <div class="sidebar-control">
       <div class="sidebar-control__item">
-        24h <b-form-checkbox v-model="timeType" name="check-button" switch /> 12h
+        24h <b-form-checkbox v-model="timeTypeBool" name="check-button" switch /> 12h
       </div>
       <div class="sidebar-control__item">
         Mo <b-form-checkbox v-model="startDay" name="check-button" switch /> Su
@@ -22,11 +22,6 @@ import store from '@/Store';
 export default {
   name: 'SideBar',
   props: ['roomList'],
-  data() {
-    return {
-      timeType: store.state.timeType,
-    }
-  },
   computed: {
     roomstList() {
       let rooms = [{ value: 'all', text: 'All room' }];
@@ -51,6 +46,14 @@ export default {
       },
       set (value) {
         store.commit('SET_DAY', value)
+      }
+    },
+    timeTypeBool: {
+      get () {
+        return store.state.timeTypeBool
+      },
+      set (value) {
+        store.commit('SET_TIME', value)
       }
     },
   }

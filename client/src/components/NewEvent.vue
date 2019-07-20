@@ -48,7 +48,7 @@
               :min-time="new Date('Fri Jul 12 2019 08:00:00')"
               :max-time="new Date('Fri Jul 12 2019 19:45:00')"
               :increment-minutes='15'
-              :hour-format="format"
+              :hour-format="timeType"
               v-model="newEventForm.startTime"
             />
           </b-form-group>
@@ -69,14 +69,14 @@
               :min-time="new Date('Fri Jul 12 2019 08:15:00')"
               :max-time="new Date('Fri Jul 12 2019 20:00:00')"
               :increment-minutes='15'
-              :hour-format="format"
+              :hour-format="timeType"
             />
           </b-form-group>
           <b-alert show variant="danger" v-if='errors.endTime'>Min time 8:15, max 20:00</b-alert>
         </b-col>
         <b-col cols='4' class="calendar__timeFormat">
           <div class="control">
-            <b-switch v-model="newEventForm.formatAmPm">AM/PM</b-switch>
+            <b-switch v-model="timeTypeBool">AM/PM</b-switch>
           </div>
         </b-col>
       </b-row>
@@ -155,13 +155,13 @@ export default {
   props: ['currentDate', 'dayOnClick', 'getEventsForThisMonth', 'roomList'],
   data() {
     return {
+      formatAmPm: '',
       newEventForm: {
         room: null,
         date: '',
         startTime: new Date('Jan 01 1970 08:00:00'),
         endTime: new Date('Jan 01 1970 09:00:00'),
         note: '',
-        formatAmPm: '',
         userId: '1',
         recurrent: {
           status: false,
@@ -294,7 +294,23 @@ export default {
   },
   computed: {
     format() {
-      return this.newEventForm.formatAmPm ? '12' : '24'
+      return this.formatAmPm ? '12' : '24'
+    },
+    timeType: {
+      get () {  
+        return store.state.timeType
+      },
+      set (value) {
+        store.commit('SET_TIME_24_12', value)
+      }
+    },
+    timeTypeBool: {
+      get () {  
+        return store.state.timeTypeBool
+      },
+      set (value) {
+        store.commit('SET_TIME', value)
+      }
     },
     roomstList() {
       let rooms = [{ value: null, text: 'Please select', disabled: true }];

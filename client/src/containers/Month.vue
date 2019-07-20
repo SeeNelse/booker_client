@@ -3,7 +3,11 @@
     <b-row>
       <b-col cols="3">
         <SideBar :roomList='roomList' />
-        <SelectedEvent :selectedEventsObj='selectedEventsObj' />
+        <SelectedEvent 
+          :selectedEventsObj='selectedEventsObj' 
+          :selectedEventsRoom='selectedEventsRoom'
+          :timeTypeBool='timeTypeBool'
+        />
       </b-col>
       <b-col cols="9">
         <div class="calendar">
@@ -69,6 +73,7 @@ export default {
       dayOnClick: {},
       eventForThisMonth: [],
       selectedEventsObj: {},
+      selectedEventsRoom: '',
       roomList: []
     }
   },
@@ -127,6 +132,13 @@ export default {
 
     // окно ивентов
     windowEventHandler(event) {
+      if (event[0].room_id === 1) {
+        this.selectedEventsRoom = 'Red';
+      } else if (event[0].room_id === 2) {
+        this.selectedEventsRoom = 'Blue';
+      } else if (event[0].room_id === 3) {
+        this.selectedEventsRoom = 'Green';
+      }
       this.selectedEventsObj = event;
     },
     
@@ -206,14 +218,7 @@ export default {
             scanned: false
           };
         }
-        // monthDays[date.getDate()-1] = {
-        //   number: date.getDate(),
-        //   day: this.daysName[date.getDay() - 1] ? date.getDay() - 1 : 6,
-        //   presentDay: date.getDate() === currentDate.getDate() && 
-        //             month === currentDate.getMonth() && 
-        //             year === currentDate.getFullYear() ? true : false,
-          
-        // };
+
         monthDays[date.getDate()-1].fullDate = monthDays[date.getDate()-1].year + '-' + // строка в виде "yyyy-mm-dd"
           (monthDays[date.getDate()-1].month < 10 ? '0' + monthDays[date.getDate()-1].month : monthDays[date.getDate()-1].month) + '-' + 
           (monthDays[date.getDate()-1].number < 10 ? '0' + monthDays[date.getDate()-1].number : monthDays[date.getDate()-1].number);
@@ -279,7 +284,7 @@ export default {
       return this.monthToWeeks(result);
     },
 
-    // ВСПОМНИ ЧТО ЭТО И ДОПИШИ
+    // делаем недели
     monthToWeeks(month) {
       let resultMonth = [],
       week = 0,
@@ -334,6 +339,12 @@ export default {
     selectRoomsValue: {
       get () {
         return store.state.selectRoomsValue
+      },
+    },
+
+    timeTypeBool: {
+      get () {
+        return store.state.timeTypeBool
       },
     },
   },

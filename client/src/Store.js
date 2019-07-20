@@ -4,9 +4,10 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
-    timeType: false,
+    timeTypeBool: false,
     startDay: false,
     selectRoomsValue: 'all',
+    timeType: '24',
   },
   getters: {
     startDay () {
@@ -19,6 +20,17 @@ const store = new Vuex.Store({
     },
     SET_ROOM (state, payload) {
       state.selectRoomsValue = payload;
+    },
+    SET_TIME (state, payload) {
+      state.timeTypeBool = payload;
+      if (payload) {
+        state.timeType = '12';
+      } else {
+        state.timeType = '24';
+      }
+    },
+    SET_TIME_24_12 (state, payload) {
+      state.timeType = payload;
     }
   }
 });

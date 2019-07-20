@@ -27,7 +27,8 @@ module.exports = class DataBase {
     ON booker_event.user_id = booker_users.user_id
     INNER JOIN booker_rooms
     ON booker_event.room_id = booker_rooms.room_id
-    WHERE year = '${params.year}' AND month = '${params.month}'`;
+    WHERE year = '${params.year}' AND month = '${params.month}'
+    ORDER BY time_start`;
     return sendQuery(query);
   }
 
