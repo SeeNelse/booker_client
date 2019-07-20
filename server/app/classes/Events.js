@@ -48,9 +48,7 @@ module.exports = class Events {
       return false;
     }
 
-    let minTimes = this.timeToMin(event);
-    console.log(1, minTimes.startTimeMin);
-    if (minTimes.startTimeMin < 480 || minTimes.endTimeMin > 1200) {
+    if (event.startTime < 300 || event.endTime > 1020) {
       return false;
     }
 
@@ -65,20 +63,5 @@ module.exports = class Events {
     }
 
     return EventsDB.setNewEvent(event, currentDate);
-  }
-  
-
-  // Время ивента в минуты
-  timeToMin(event) { // СЮДА ЧТО-ТО НАДО БУДЕТ ДОПИСАТЬ
-    let startTime = new Date(event.startTime);
-    let endTime = new Date(event.endTime);
-    console.log(2, event.startTime)
-    console.log(3, startTime, startTime.getHours());
-    console.log(123213213, new Date().toLocaleString());
-    let objTimes = {
-      startTimeMin: startTime.getHours() * 60 + startTime.getMinutes(),
-      endTimeMin: endTime.getHours() * 60 + endTime.getMinutes()
-    }
-    return objTimes;
   }
 }

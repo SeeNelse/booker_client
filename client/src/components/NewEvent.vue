@@ -215,14 +215,6 @@ export default {
         this.errors.time = false;
       }
 
-      // let startTime = this.newEventForm.startTime;
-      // let startTimeMin = startTime.getHours() * 60 + startTime.getMinutes();
-      // let startFullTime = startTime.getHours() + ':' + startTime.getMinutes();
-      
-      // let endTime = this.newEventForm.endTime;
-      // let endTimeMin = endTime.getHours() * 60 + endTime.getMinutes();
-      // let endFullTime = endTime.getHours() + ':' + endTime.getMinutes();
-
       if (
         this.newEventForm.recurrent.type === 'Weekly' && this.newEventForm.recurrent.countWeekly < 1 || 
         this.newEventForm.recurrent.type === 'Weekly' && this.newEventForm.recurrent.countWeekly > 4
@@ -257,9 +249,15 @@ export default {
         this.errors.note = false;
       }
 
-      // Присваиваем времени нужную дату
-      console.log(this.newEventForm);
-      const eventDataForDB = JSON.stringify(this.newEventForm);
+      // форматируем часы в минуты
+      let startTime = new Date(this.newEventForm.startTime);
+      startTime = startTime.getTime() / 60000;
+      let endTime = new Date(this.newEventForm.endTime);
+      endTime = endTime.getTime() / 60000;
+      let eventDataResult = {...this.newEventForm, startTime, endTime}
+
+      // отправляем запрос
+      const eventDataForDB = JSON.stringify(eventDataResult);
       axios.post(`${serverUrl}/api/event/new`, eventDataForDB)
         .then((response) => {
           if (response.status === 200) {

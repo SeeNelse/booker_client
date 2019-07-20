@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const port = 9008;
+const port = 8000;
 const routes = require('./app/routes/index');
 const cors = require('cors');
 // const moment = require('moment-timezone');

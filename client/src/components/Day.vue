@@ -13,7 +13,14 @@
     </span>
     
     <div v-if='getEvents'>
-      <div v-for='(event, roomName) in getEvents'>
+      <div 
+        v-for='(event, roomName) in getEvents' 
+        v-if="
+        selectRoomsValue === 1 && roomName === 'red' ||
+        selectRoomsValue === 2 && roomName === 'blue' ||
+        selectRoomsValue === 3 && roomName === 'green' ||
+        selectRoomsValue === 'all'"
+      >
         <b-badge 
           class="calendar__day-event" 
           :class="{
@@ -23,7 +30,7 @@
           }"
           variant="dark" 
           v-on:click="windowEventHandler(event)"
-        />
+        >{{event.length}} events</b-badge>
       </div>
     </div>
     
@@ -98,7 +105,8 @@ export default {
   .calendar__day-event {
     z-index: 2;
     position: relative;
-    width: 45px;
+    line-height: 18px !important;
+    margin-bottom: 5px;
     height: 25px;
     display: inline-block !important;
   }
