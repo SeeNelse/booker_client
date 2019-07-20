@@ -25,7 +25,9 @@ CREATE TABLE `booker_users` (
   `user_email` VARCHAR(64) NOT NULL , 
   `status` ENUM('active','not_active') NOT NULL , 
   `role_id` INT(6) NOT NULL , PRIMARY KEY (`user_id`),
-  `token` VARCHAR(255));
+  `token` VARCHAR(255),
+  `log_in_time` VARCHAR(128)
+  );
   
 INSERT INTO `booker_users` (`user_id`, `user_name`, `user_pass`, `user_email`, `status`, `role_id`, `token`) VALUES (NULL, 'username', '123123123', 'exaple@gmail.com', 'active', '1', '123123');
 

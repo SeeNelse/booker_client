@@ -15,26 +15,42 @@ module.exports = function(app) {
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
-    let queryResult = Auth.setRegistration(request.body);
-    console.log(queryResult);
-    if (queryResult === undefined || queryResult === false) {
+    let result = Auth.setRegistration(request.body);
+    if (result === undefined || result === false) {
       response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
       return false;
     } 
-    queryResult
+    
+    result
       .then(ViewResult => View.getData(ViewResult, request.params.format))
       .then(result => {
-        console.log('RESSS', result);
         if (result) {
           response.status(HttpStatus.OK).send(result);
         } else {
-          response.status(HttpStatus.NOT_FOUND).send(View.getData(Errors.notFound(), request.params.format));
+          response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
         }
       });
   });
 
   app.post('/api/user/login/:format?', (request, response) => {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
+    let result = Auth.getLogIn(request.body);
+    if (result === undefined || result === false) {
+      response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
+      return false;
+    } 
+
+    result
+      .then(ViewResult => View.getData(ViewResult, request.params.format))
+      .then(result => {
+        if (result) {
+          response.status(HttpStatus.OK).send(result);
+        } else {
+          response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
+        }
+      });
   });
 
 }

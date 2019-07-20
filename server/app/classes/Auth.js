@@ -20,11 +20,37 @@ module.exports = class Auth {
     }
 
     // Хэшируем пароль и записываем в базу
-    return bcrypt.hash(userData.password, saltRounds).then(function(hash) {
+    return bcrypt.hash(userData.password, saltRounds).then(hash => {
       userData.password = hash;
       return AuthDB.setRegistration(userData);
     });
+  }
 
+  getLogIn(userData) {
+    userData = JSON.parse(Object.keys(userData)[0]);
+    return (async () => {
+      // Берем данные о юзере с базы
+      let userDataFromDB = await AuthDB.getLogInData(userData);
+      if (!userDataFromDB.length) {
+        return false;
+      }
+      // Проверка имейла
+      let checkPassResult = false;
+      await bcrypt.compare(userData.password, userDataFromDB[0].user_pass).then(function(result) {
+        if (result) {
+          checkPassResult = true;
+        }
+      });
+      if (!checkPassResult) {
+        return false;
+      }
+
+      return bcrypt.hash(userDataFromDB[0].user_name+userDataFromDB[0].user_email, saltRounds).then(hash => {
+        AuthDB.setLogInToken(userData, hash);
+        return {name: userDataFromDB[0].user_name, token: hash, logInTime: userData.logInTime, userId: userDataFromDB[0].user_id, role: userDataFromDB[0].role_id};
+      });
+
+    })();
   }
 
 }
