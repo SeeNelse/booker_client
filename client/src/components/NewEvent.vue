@@ -6,12 +6,6 @@
         label="Select room:*"
         label-for="newEvent-select-room"
       >
-        <!-- <b-form-select id="newEvent-select-room" v-model="newEventForm.room" required>
-          <option :value='null'>Please select</option>
-          <option value="red">Room Red</option>
-          <option value="blue">Room Bue</option>
-          <option value="green">Room Green</option>
-        </b-form-select> -->
         <b-form-select v-model="newEventForm.room" :options="roomstList" class='sidebar__select'></b-form-select>
       </b-form-group>
 
@@ -159,13 +153,12 @@ export default {
       newEventForm: {
         room: null,
         date: '',
-        startTime: new Date('Jan 01 1970 08:00:00'),
-        endTime: new Date('Jan 01 1970 09:00:00'),
+        startTime: this.startEndTimeDate(true),
+        endTime: this.startEndTimeDate(false),
         note: '',
-        userId: '1',
         recurrent: {
           status: false,
-          type: 'Weekly',
+          type: '',
           countWeekly: '1',
           countBiweekly: '1',
           countMonthly: '1',
@@ -192,7 +185,6 @@ export default {
 
     newEventSubmit(event) {
       event.preventDefault();
-      
       // Проверки
       if (!this.newEventForm.room) {
         this.errors.room = true;
@@ -249,12 +241,20 @@ export default {
         this.errors.note = false;
       }
 
+      if (!this.newEventForm.recurrent.status) {
+        this.newEventForm.recurrent.type = '';
+      }
       // форматируем часы в минуты
       let startTime = new Date(this.newEventForm.startTime);
       startTime = startTime.getTime() / 60000;
       let endTime = new Date(this.newEventForm.endTime);
       endTime = endTime.getTime() / 60000;
-      let eventDataResult = {...this.newEventForm, startTime, endTime}
+      let eventDataResult = {
+        ...this.newEventForm, 
+        startTime: Math.floor(startTime), 
+        endTime: Math.floor(endTime), 
+        userId: this.userInfo.userId
+      };
 
       // отправляем запрос
       const eventDataForDB = JSON.stringify(eventDataResult);
@@ -291,10 +291,65 @@ export default {
       return year+"-"+month+"-"+day;
     },
 
+    startEndTimeDate(start) {
+      if (this.dayOnClick.presentDay) {
+        let date = new Date();
+        date = date.toJSON();
+        let time = date.match( /T\d\d:\d\d/i );
+        time = time[0].split('T');
+
+        let partTime = time[1].split(':');
+        if (start) {
+          var hours = +partTime[0];
+        } else {
+          var hours = +partTime[0] + 1;
+        }
+        let minute = partTime[1];
+
+        if (minute < 15) {
+          minute = '15';
+        } else if (minute > 15 && minute < 30) {
+          minute = '30';
+        } else if (minute > 30 && minute < 45) {
+          minute = '45';
+        } else if (minute > 45) {
+          hours++;
+          minute = '00';
+        }
+
+        if (+hours < 10) {
+          hours = '0' + hours;
+        }
+
+        date = date.replace(time[1], hours+':'+minute);
+        date = new Date(date);
+        date.setDate(1);
+        date.setFullYear(1970);
+        date.setMonth(0);
+        date.setSeconds(0);
+        return new Date(date);
+      } else {
+        if (start) {
+          return new Date('Jan 01 1970 08:00:00');
+        } else {
+          return new Date('Jan 01 1970 09:00:00');
+        }
+      }
+    }
+
   },
   computed: {
     format() {
       return this.formatAmPm ? '12' : '24'
+    },
+    roomstList() {
+      let rooms = [{ value: null, text: 'Please select', disabled: true }];
+      this.roomList.forEach(element => {
+        let roomName = element.room_name;
+        roomName = roomName.charAt(0).toUpperCase() + roomName.substr(1);
+        rooms.push({ value: element.room_id, text: roomName });
+      });
+      return rooms;
     },
     timeType: {
       get () {  
@@ -312,14 +367,10 @@ export default {
         store.commit('SET_TIME', value)
       }
     },
-    roomstList() {
-      let rooms = [{ value: null, text: 'Please select', disabled: true }];
-      this.roomList.forEach(element => {
-        let roomName = element.room_name;
-        roomName = roomName.charAt(0).toUpperCase() + roomName.substr(1);
-        rooms.push({ value: element.room_id, text: roomName });
-      });
-      return rooms;
+    userInfo: {
+      get () {
+        return store.state.userInfo
+      },
     },
   }
 }

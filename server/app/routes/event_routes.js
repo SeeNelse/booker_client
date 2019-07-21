@@ -15,8 +15,8 @@ module.exports = function(app) {
   app.get('/api/event/:year/:month/:format?', (request, response) => {
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    let queryResult = Events.getEventsForThisMonth(request.params);
-    queryResult
+    let getEvents = Events.getEventsForThisMonth(request.params);
+    getEvents
       .then(ViewResult => View.getData(ViewResult, request.params.format))
       .then(result => {
         if (result.length) {
@@ -30,16 +30,16 @@ module.exports = function(app) {
 
   // Записываем новые значения в базу
   app.post('/api/event/new/:format?', (request, response) => { 
-    console.log('*****************************************************************');
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    let queryNewEvent = Events.setNewEvent(request.body);
-    console.log('RESULT TO FRONT', queryNewEvent);// Проверка если пришел false, тру не будет, т.к. приходит только промис
-    if (queryNewEvent === undefined || queryNewEvent === false) {
+    let newEvent = Events.setNewEvent(request.body);
+    if (newEvent === undefined || newEvent === false) {
       response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
       return false;
     } 
-    queryNewEvent.then(result => {
+    newEvent
+    .then(ViewResult => View.getData(ViewResult, request.params.format))
+    .then(result => {
       if (result) {
         response.status(HttpStatus.OK).send(result);
       } else {
@@ -48,47 +48,53 @@ module.exports = function(app) {
     });
   });
 
-  // Апдейт ивента
 
   // Удаление ивента
+  app.delete('/api/event/delete/:id/:userId/:userRole/:recurrent/:format?', (request, response) => {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    let deleteEvent = Events.deleteEvent(request.params);
+    if (deleteEvent === undefined || deleteEvent === false) {
+      response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
+      return false;
+    }
+    deleteEvent
+      .then(ViewResult => View.getData(ViewResult, request.params.format))
+      .then(result => {
+        if (result) {
+          response.status(HttpStatus.OK).send(result);
+        } else {
+          response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
+        }
+      });
+  });
 
-  // Запись нового ивента в базу
-  // app.delete('/api/event/new', (req, res) => {
-  //   console.log(123123);
-  //   res.header("Access-Control-Allow-Origin", "*");
-  //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  //   let query = 'SELECT * FROM `booker_event`';
-  //   let queryArg = '';
-  //   mysqlConnect(query, queryArg)
-  //   .then((request) => {
-  //     console.log(request);
-  //     res.send(request)
-  //   })
-  //   .catch((error) => {
-  //     console.log('Error in the Query', error);
-  //   });
-  // });
+  // Апдейт ивента
+  app.put('/api/event/edit/:id/:format?', (request, response) => {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    updateEvent = Events.updateEvent(request.params.id, request.body);
+    if (updateEvent === undefined || updateEvent === false) {
+      response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
+      return false;
+    }
+    updateEvent
+      .then(ViewResult => View.getData(ViewResult, request.params.format))
+      .then(result => {
+        if (result) {
+          response.status(HttpStatus.OK).send(result);
+        } else {
+          response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format));
+        }
+      });
 
 
-
-  // апдейт
-  // app.put('/event/:id', (req, res) => {
-  //   res.header("Access-Control-Allow-Origin", "*");
-  //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  //   console.log(req.params.id);
-  //   mysqlServer.query(
-  //     'UPDATE `test` SET '+req.params.id,
-  //     function (error, results, fields) {
-  //       res.send(results);
-  //       mysqlServer.end();
-  //     }
-  //   );
-  // });
+  });
 
 
-  app.get('/*?', (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.send('404');
+  app.get('/:format?', (request, response) => {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    response.status(HttpStatus.NOT_ACCEPTABLE).send(View.getData(Errors.notFound(), request.params.format))
   });
 };

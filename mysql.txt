@@ -1,4 +1,4 @@
-CREATE TABLE booker_event ( 
+  CREATE TABLE booker_event ( 
   `event_id` INT(6) NOT NULL AUTO_INCREMENT , 
   `note` VARCHAR(255) NULL DEFAULT NULL , 
   `time_start` VARCHAR(255) NOT NULL , 
@@ -8,7 +8,7 @@ CREATE TABLE booker_event (
   `month` INT(4) NOT NULL , 
   `user_id` INT(6) NOT NULL , 
   `room_id` INT(6) NOT NULL ,
-  `recurrent_type` BOOLEAN NOT NULL,
+  `recurrent_type` VARCHAR(255),
   `recurrent_id` VARCHAR(36) NULL DEFAULT NULL , 
   PRIMARY KEY (`event_id`));
 

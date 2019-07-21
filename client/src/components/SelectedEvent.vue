@@ -16,6 +16,14 @@
             <li>{{event.user_name}}</li>
             <li v-if='event.note'>{{event.note}}</li>
           </ul>
+          <div 
+            class="selected-event__btns"
+            v-if='userInfo.role === 1 && canEditAndDelete(event) || 
+            userInfo.userId === event.user_id && canEditAndDelete(event)'
+          >
+            <b-button @click='eventEdit(event)'><font-awesome-icon icon='edit'/></b-button>
+            <b-button @click='deleteBtn(event.event_id, event)'><font-awesome-icon icon='trash-alt'/></b-button>
+          </div>
       </div>
     </div>
   </fragment>
@@ -23,10 +31,13 @@
 
 <script>
 import to12hConvert from '@/helpers/to12hConvert';
+import store from '@/Store';
 
 export default {
   name: 'SelectedEvent',
-  props: ['selectedEventsObj', 'selectedEventsRoom', 'timeTypeBool'],
+  props: ['selectedEventsObj', 'selectedEventsRoom', 'timeTypeBool', 'deleteBtn', 'eventEdit', 'currentDate'],
+  created() {
+  },
   methods: {
     minToHours(min) { // Перевод минут в человеческое время
       let hours = min / 60;
@@ -37,7 +48,29 @@ export default {
       } else {
         return resultTime;
       }
+    },
+    canEditAndDelete(event) { // Скрыть удаление и редактирование записи, которая уже прошла
+      let eventDate = this.currentDate.replace('-', '').replace('-', '');
+
+      let date = new Date();
+      var currentDay = date.getDate();
+      var currentMonth = date.getMonth() + 1;
+      var currentYear = date.getFullYear();
+      let currentDate = currentYear + "0" + currentMonth + currentDay;
+
+      if(eventDate < currentDate) {
+        return false;
+      } else {
+        return true;
+      }
     }
+  },
+  computed: {
+    userInfo: {
+      get () {
+        return store.state.userInfo
+      },
+    },
   }
 }
 </script>
@@ -56,15 +89,43 @@ export default {
     padding: 12px 15px 20px;
     margin-bottom: 40px;
   }
+
   .selected-event_red {
     border-top: 5px solid #ea6c78;
   }
+  .selected-event_red button {
+    background: #ea6c78;
+    border: 1px solid #da4856;
+  }
+  .selected-event_red button:hover {
+    background: #ea6c78;
+    box-shadow: inset 0px 0px 77px -30px rgba(0,0,0,0.45) !important;
+  }
+
   .selected-event_blue {
       border-top: 5px solid #4197f3;
   }
+  .selected-event_blue button {
+    background: #4197f3;
+    border: 1px solid #2f6caf;
+  }
+  .selected-event_blue button:hover {
+    background: #4197f3;
+    box-shadow: inset 0px 0px 77px -30px rgba(0,0,0,0.45) !important;
+  }
+
   .selected-event_green {
     border-top: 5px solid #4fc369;
   }
+  .selected-event_green button {
+    background: #4fc369;
+    border: 1px solid #329448;
+  }
+  .selected-event_green button:hover {
+    background: #4fc369;
+    box-shadow: inset 0px 0px 77px -30px rgba(0,0,0,0.45) !important;
+  }
+
   .selected-event__btns {
     margin-top: 20px;
   }
@@ -82,5 +143,8 @@ export default {
     border: none;
     margin-bottom: 0;
     padding-bottom: 0;
+  }
+  .selected-event__btns button {
+    margin-right: 10px;
   }
 </style>

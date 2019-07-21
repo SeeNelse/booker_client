@@ -3,10 +3,6 @@ const EventsDB = new EventsDBClass();
 
 module.exports = class Events {
 
-  constructor() {
-
-  }
-
   // Запрос на получение списка ивентов в месяце
   getEventsForThisMonth(params) {
     if (
@@ -63,5 +59,87 @@ module.exports = class Events {
     }
 
     return EventsDB.setNewEvent(event, currentDate);
+  }
+
+  // Удаляем ивент
+  deleteEvent(params) {
+    return (async () => {
+      let eventForCheck = await EventsDB.getCheckEventForDeleteAndEdit(params.id);
+      if (+eventForCheck[0].user_id === +params.userId || +params.userRole === 1) {
+        if (params.recurrent === 'true') { // приходит строка. В 3 ночи не охота с этим париться, извините пожалуйста =\
+          let recurrentDays = eventForCheck[0].recurrent_id.split(',');
+          recurrentDays.push(eventForCheck[0].event_id);
+          let result = EventsDB.deleteEvent(recurrentDays);
+          return result;
+        } else {
+          let result = EventsDB.deleteEvent(eventForCheck[0].event_id);
+          return result;
+        }
+      } else {
+        return false;
+      }
+    })()
+  }
+
+  // Обновление ивента
+  updateEvent(eventId, data) {
+    const waitFor = (ms) => new Promise(r => setTimeout(r, ms)); // Это потом стоит вынести в отдельный метод
+    async function asyncForEach(array, callback) {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+      }
+    }
+
+    let event = JSON.parse(Object.keys(data)[0]);
+    return (async () => {
+      let currentEvent = await EventsDB.getCheckEventForDeleteAndEdit(eventId);
+      if (+currentEvent[0].user_id === +event.userId || +event.userRole === 1) {
+        if (event.updateRecurrent) {
+          let eventsArray = [];
+          if (+currentEvent[0].recurrent_type) {
+            eventsArray = await EventsDB.getEventForRecurrentEdit(+currentEvent[0].recurrent_type, true);
+          } else {
+            eventsArray = await EventsDB.getEventForRecurrentEdit(+currentEvent[0].event_id, true);
+          }
+          let timeCheckResult = true;
+          let timeCheck;
+          return (async () => {
+            // проверка на время
+            await asyncForEach(eventsArray, async (element) => {
+              await waitFor(20);
+              if (element.event_id >= eventId) {
+                timeCheck = await EventsDB.newEventTimeCheck(event, element);
+                if (!timeCheck) {
+                  return timeCheckResult = false;
+                }
+              }
+            });
+            if (!timeCheckResult) {
+              return false;
+            }
+
+            // Записываем новые значения
+            await asyncForEach(eventsArray, async (element) => {
+              await waitFor(20);
+              if (element.event_id >= eventId) {
+                EventsDB.setEditEvent(element, event);
+              }
+            });
+            return true;
+
+          })()
+        } else {
+          return (async () => {
+            let thisElement = await EventsDB.getEventForRecurrentEdit(eventId, false);
+            let timeCheck = await EventsDB.newEventTimeCheck(event, thisElement[0]);
+            if (!timeCheck) {
+              return false;
+            }
+            EventsDB.setEditEvent(thisElement[0], event);
+            return true;
+          })();
+        }
+      }
+    })();
   }
 }

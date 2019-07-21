@@ -23,7 +23,7 @@ module.exports = class AuthDB {
   setNewUser(userData) {
     let query = `
     INSERT INTO booker_users (user_name, user_pass, user_email, status, role_id, token) 
-    VALUES ('${userData.username}', '${userData.password}', '${userData.email}', 'active', '1', '');`
+    VALUES ('${userData.username}', '${userData.password}', '${userData.email}', 'active', '2', '');`
     return sendQuery(query);
   }
 

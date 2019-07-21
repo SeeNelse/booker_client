@@ -168,14 +168,14 @@ export default {
     if (!storage || !storage.logInTime) {
       return false;
     }
-    let currentMs = new Date().getTime();
-    var msToMinCurrent = (currentMs / (1000 * 60)).toFixed(0);
-    var msToMinStorage = (storage.logInTime / (1000 * 60)).toFixed(0)
-    if (+msToMinCurrent - +msToMinStorage <= 20) {
+    // let currentMs = new Date().getTime();
+    // var msToMinCurrent = (currentMs / (1000 * 60)).toFixed(0);
+    // var msToMinStorage = (storage.logInTime / (1000 * 60)).toFixed(0)
+    // if (+msToMinCurrent - +msToMinStorage <= 20) {
       this.userInfo = storage;
-    } else {
-      localStorage.setItem('bookerCurrentUser', JSON.stringify(''));
-    }
+    // } else {
+      // localStorage.setItem('bookerCurrentUser', JSON.stringify(''));
+    // }
   },
   methods: {
     signUpSubmit(event) {

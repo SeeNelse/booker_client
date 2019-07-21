@@ -8,7 +8,7 @@ import BootstrapVue from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faChevronLeft, faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Fragment from 'vue-fragment';
 import { Timepicker } from 'buefy/dist/components/timepicker';
@@ -20,7 +20,7 @@ import '@/css/timePicker.css';
 
 Vue.use(Fragment.Plugin);
 Vue.use(BootstrapVue);
-library.add(faChevronRight, faChevronLeft);
+library.add(faChevronRight, faChevronLeft, faEdit, faTrashAlt);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.config.productionTip = false;

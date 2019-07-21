@@ -29,7 +29,7 @@
             'calendar__day-event-green': roomName === 'green'
           }"
           variant="dark" 
-          v-on:click="windowEventHandler(event)"
+          v-on:click="windowEventHandler(event, day)"
         >{{event.length}} events</b-badge>
       </div>
     </div>

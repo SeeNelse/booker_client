@@ -26,7 +26,7 @@ module.exports = class View {
 
   getHtml(queryResult) {
     let htmlRequest = '<div>'
-    queryResult.map(queryItem => {
+    queryResult.forEach(queryItem => {
       htmlRequest += '<ul>';
       for (let elementItem in queryItem) {
         htmlRequest += `<li>${elementItem}: ${queryItem[elementItem]}</li>`;
@@ -40,7 +40,7 @@ module.exports = class View {
 
   getTxt(queryResult) {
     let txtRequest = '[';
-    queryResult.map(queryItem => {
+    queryResult.forEach(queryItem => {
       txtRequest += '[';
       for (let elementItem in queryItem) {
         txtRequest += `[${elementItem}: ${queryItem[elementItem]}],`;

@@ -73,7 +73,7 @@ module.exports = class DataBase {
       return `INSERT INTO booker_event 
         (note, time_start, time_end, year, day, month, user_id, room_id, recurrent_type, recurrent_id) 
         VALUES ('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', 
-        '${date.number}', '${date.month}', '1', '${event.room}', false, ${recurrentId});`;
+        '${date.number}', '${date.month}', '${event.userId}', '${event.room}', '${event.recurrent.type}', ${recurrentId});`;
     })();
   }
   
@@ -87,21 +87,11 @@ module.exports = class DataBase {
   }
 
   // Генерация значений для рекурентов
-  getRecurrentValues(event, date) {
+  getRecurrentValues(event, date, parentId) {
     return (async () => {
-      return `('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', '${date.number}', '${date.month}', '1', '${event.room}', true, null),`;
+      return `('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', '${date.number}', '${date.month}', '${event.userId}', '${event.room}', ${parentId}, null),`;
     })();
   }
-
-  // Генерация запроса для апдейта
-  // getUpdateEventQuery(event, date, recurrentId = null) {
-  //   return (async () => {
-  //     return `INSERT INTO booker_event 
-  //       (note, time_start, time_end, year, day, month, user_id, room_id, recurrent_type, recurrent_id) 
-  //       VALUES ('${event.note}', '${event.startTime}', '${event.endTime}', '${date.year}', 
-  //       '${date.number}', '${date.month}', '1', '${roomId[0].room_id}', false, ${recurrentId});`;
-  //   })();
-  // }
 
   // Генерация запроса для проверки ивентов в нужную дату
   getEventsForThisDay(date, event) {
@@ -111,15 +101,50 @@ module.exports = class DataBase {
       booker_event.time_end,
       booker_event.year,
       booker_event.day,
-      booker_event.month
+      booker_event.month,
+      booker_event.event_id
     FROM booker_event
     INNER JOIN booker_rooms
     ON booker_event.room_id = booker_rooms.room_id
     WHERE booker_event.year = '${date.year}' 
     AND booker_event.month = '${date.month}' 
-    AND booker_event.day = '${date.number}'
-    AND booker_rooms.room_id = '${event.room}' `;
+    AND booker_event.day = '${(date.number || date.day)}'
+    AND booker_rooms.room_id = '${event.room || date.room_id}' `;
     return sendQuery(query); 
+  }
+
+  // Запрос на ивент, который необходимо удалить
+  getCheckEventForDeleteAndEdit(id) {
+    let query = `SELECT * FROM booker_event WHERE event_id = '${id}'`;
+    return sendQuery(query);
+  }
+
+  // Удалить ивент
+  deleteEvent(Id) {
+    let query = `DELETE FROM booker_event WHERE event_id IN (${Id});`;
+    return sendQuery(query);
+  }
+
+  // Стянуть ивенты для проверки при апдейте
+  getEventForRecurrentEdit(id, recurrent) {
+    let query = '';
+    if (recurrent) {
+      query = `SELECT * FROM booker_event WHERE event_id = '${id}' OR recurrent_type = '${id}'`;
+    } else {
+      query = `SELECT * FROM booker_event WHERE event_id = '${id}'`;
+    }
+    return sendQuery(query);
+  }
+
+  setEditEvent(item, event) {
+    let query = `
+      UPDATE booker_event 
+      SET user_id = '${event.userId}', 
+      time_start = '${event.startTime}', 
+      time_end = '${event.endTime}', 
+      note = '${event.note}' 
+      WHERE event_id = '${item.event_id}';`;
+    return sendQuery(query);
   }
 
   // Запись ивентов с рекурентами.
@@ -132,16 +157,18 @@ module.exports = class DataBase {
       }
 
       // Забираем последний айди для вычисления айди рекурентов
-      let lastIdQuery = 'SELECT MAX(event_id) FROM booker_event;'
+      let lastIdQuery = "SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'booker' AND TABLE_NAME = 'booker_event'";
       let currentId = await sendQuery(lastIdQuery);
-      currentId = currentId[0]['MAX(event_id)'] + 1;
+      currentId = currentId[0]['AUTO_INCREMENT'];
+      let parentId = currentId;
+
       // собираем айди рекурентов
       let recurrentId = [];
-
       for (var i = 0; i < recurrentDates.length; i++) {
         currentId++;
         recurrentId.push(currentId);
       }
+
       // Записываем основную запись
       let mainQuery = await this.getNewEventQuery(event, date, "'"+recurrentId+"'");
       let mainQueryResult = await sendQuery(mainQuery);
@@ -151,7 +178,7 @@ module.exports = class DataBase {
       }
 
       // Генерируем квери и записываем записи рекурентов
-      let recurrentValues = await this.getCheckAndGenerateQuerys(event, recurrentDates, false); 
+      let recurrentValues = await this.getCheckAndGenerateQuerys(event, recurrentDates, false, parentId); 
       let recurrentQuerys = await this.getNewEventRecurrentQuery(recurrentValues);
       let recurrentResult = await sendQuery(recurrentQuerys);
 
@@ -207,7 +234,7 @@ module.exports = class DataBase {
   }
 
   // Проверка свободного времени и генерация значений для рекурентов
-  getCheckAndGenerateQuerys(event, recurrentDates, check) {
+  getCheckAndGenerateQuerys(event, recurrentDates, check, parentId) {
     // Вспомогательные функции для перебора массива с промисами
     const waitFor = (ms) => new Promise(r => setTimeout(r, ms));
     async function asyncForEach(array, callback) {
@@ -227,7 +254,7 @@ module.exports = class DataBase {
             timeIsBusy = true;
           }
         } else { // Генерация
-          querys += await this.getRecurrentValues(event, element);
+          querys += await this.getRecurrentValues(event, element, parentId);
         }
       });
       if (querys) {
@@ -242,14 +269,6 @@ module.exports = class DataBase {
 
   // Проверяем время на совпадение
   newEventTimeCheck(event, date) {
-    // let startTime = new Date(event.startTime);
-    // let endTime = new Date(event.endTime);
-    // let minTimes = {
-    //   startTimeMin: startTime.getHours() * 60 + startTime.getMinutes(),
-    //   endTimeMin: endTime.getHours() * 60 + endTime.getMinutes()
-    // }
-
-
     return (async () => {
       let eventForThisMonth = await this.getEventsForThisDay(date, event);
       if (!eventForThisMonth.length) {
@@ -257,21 +276,20 @@ module.exports = class DataBase {
       }
       let coincidenceFlag;
       for (let eventItem in eventForThisMonth) {
-        // let startTimeEvent = new Date(eventForThisMonth[eventItem].time_start);
-        // let startTimeEventMin = startTimeEvent.getHours() * 60 + startTimeEvent.getMinutes();
-        // let endTimeEvent = new Date(eventForThisMonth[eventItem].time_end);
-        // let endTimeMinEvent = endTimeEvent.getHours() * 60 + endTimeEvent.getMinutes();
-        
         // перебор всех записей месяца
-        if (event.startTime >= eventForThisMonth[eventItem].time_start && event.startTime < eventForThisMonth[eventItem].time_end) {
-          coincidenceFlag = false;
-          return false;
+        if (eventForThisMonth[eventItem].event_id === date.event_id) {
+          coincidenceFlag = true;
         } else {
-          if (event.endTime > eventForThisMonth[eventItem].time_start && event.endTime < eventForThisMonth[eventItem].time_end) {
+          if (event.startTime >= eventForThisMonth[eventItem].time_start && event.startTime < eventForThisMonth[eventItem].time_end) {
             coincidenceFlag = false;
             return false;
           } else {
-            coincidenceFlag = true;
+            if (event.endTime > eventForThisMonth[eventItem].time_start && event.endTime < eventForThisMonth[eventItem].time_end) {
+              coincidenceFlag = false;
+              return false;
+            } else {
+              coincidenceFlag = true;
+            }
           }
         }
       }

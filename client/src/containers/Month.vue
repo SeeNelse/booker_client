@@ -2,11 +2,14 @@
   <fragment>
     <b-row>
       <b-col cols="3">
-        <SideBar :roomList='roomList' />
+        <SideBar :roomList='roomList'/>
         <SelectedEvent 
           :selectedEventsObj='selectedEventsObj' 
           :selectedEventsRoom='selectedEventsRoom'
           :timeTypeBool='timeTypeBool'
+          :deleteBtn='deleteBtn'
+          :eventEdit='eventEdit'
+          :currentDate='currentDate()'
         />
       </b-col>
       <b-col cols="9">
@@ -33,13 +36,26 @@
       </b-col>
     </b-row>
 
-    <b-modal id="newEvent" title="Book room" hide-footer>
+    <b-modal id="newEvent" title="New event" hide-footer>
       <NewEvent 
         :roomList='roomList' 
         :currentDate='currentDate()' 
         :getEventsForThisMonth='getEventsForThisMonth' 
         :dayOnClick='dayOnClick'
       />
+    </b-modal>
+
+    <b-modal id="editEvent" title="Edit Event" hide-footer>
+      <EditEvent 
+        :currentEventForEdit='currentEventForEdit'
+        :roomList='roomList' 
+        :getEventsForThisMonth='getEventsForThisMonth'
+      />
+    </b-modal>
+
+    <b-modal id="deleteRecurrent" title="Delete recurrents?" hide-footer>
+      <b-button variant="info" @click='deleteEvent(true)' class='mr-3'>Yes</b-button>
+      <b-button variant="info" @click='deleteEvent(false)'>No</b-button>
     </b-modal>
 
   </fragment>
@@ -49,6 +65,7 @@
 import Week from '@/components/Week';
 import DaysOfWeek from '@/components/DaysOfWeek';
 import NewEvent from '@/components/NewEvent';
+import EditEvent from '@/components/EditEvent';
 import SelectedEvent from '@/components/SelectedEvent';
 import SideBar from '@/components/SideBar';
 import store from '@/Store';
@@ -63,6 +80,7 @@ export default {
     NewEvent,
     SelectedEvent,
     SideBar,
+    EditEvent
   },
   data() {
     return {
@@ -74,7 +92,9 @@ export default {
       eventForThisMonth: [],
       selectedEventsObj: {},
       selectedEventsRoom: '',
-      roomList: []
+      roomList: [],
+      currentEventForEdit: {},
+      deleteEventId: null,
     }
   },
   created() {
@@ -90,10 +110,12 @@ export default {
             this.eventForThisMonth = [];
             return false;
           }
+          this.selectedEventsObj = {};
           this.eventForThisMonth = response.data;
         })
         .catch(error => {
           console.log(error);
+          this.eventForThisMonth = [];
         });
     },
 
@@ -131,7 +153,7 @@ export default {
     },
 
     // окно ивентов
-    windowEventHandler(event) {
+    windowEventHandler(event, day) {
       if (event[0].room_id === 1) {
         this.selectedEventsRoom = 'Red';
       } else if (event[0].room_id === 2) {
@@ -139,12 +161,49 @@ export default {
       } else if (event[0].room_id === 3) {
         this.selectedEventsRoom = 'Green';
       }
+      this.dayOnClick = day;
       this.selectedEventsObj = event;
     },
-    
-    // логика календаря
 
-    // данный день по клику на него(для автозаполнения инпута дня)
+    // Изменить ивент
+    eventEdit(event) {
+      this.currentEventForEdit = event;
+      this.$bvModal.show('editEvent');
+    },
+
+    // удаление ивента
+    deleteBtn(id, event) {
+      this.deleteEventId = id;
+      if (event.recurrent_id && event.recurrent_type) {
+        this.$bvModal.show('deleteRecurrent');
+      } else {
+        this.deleteEvent(false);
+      }
+    },
+    deleteEvent(recurrent) {
+      this.$bvModal.hide('deleteRecurrent');
+      axios.delete(`${serverUrl}/api/event/delete/${this.deleteEventId}/${this.userInfo.userId}/${this.userInfo.role}/${recurrent}`)
+        .then((response) => {
+          if (response.status === 200) {
+            this.deleteIsSuccess();
+            this.getEventsForThisMonth();
+            this.selectedEventsObj = {};
+          }
+        })
+    },
+
+    // сообщение об успешном удалении записи
+    deleteIsSuccess() {
+      this.$bvToast.toast(':(', {
+        title: `Delete is success`,
+        variant: 'info',
+        solid: true,
+        toaster: 'b-toaster-bottom-left'
+      })
+    },
+    
+    // ЛОГИКА КАЛЕНДАРЯ
+    // данный день по клику на него(для автозаполнения инпута даты)
     currentDate() {
       let day = this.dayOnClick.number;
       let month = this.dayOnClick.month + 1;
@@ -155,6 +214,7 @@ export default {
       if (month < 10) {
         month = '0'+month;
       }
+
       return year+'-'+month+'-'+day;
     },
 
@@ -166,6 +226,7 @@ export default {
     // перелистывание календаря
     slideMonth(next) {
       this.eventForThisMonth = [];
+      this.selectedEventsObj = {};
       if (next) {
         if (this.getMonth > 10) {
           this.getMonth = 0;
@@ -334,6 +395,12 @@ export default {
         this.mondayStart = false;
         return ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
       }
+    },
+
+    userInfo: {
+      get () {
+        return store.state.userInfo
+      },
     },
 
     selectRoomsValue: {

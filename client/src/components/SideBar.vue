@@ -37,7 +37,7 @@ export default {
         return store.state.selectRoomsValue
       },
       set (value) {
-        store.commit('SET_ROOM', value)
+        store.commit('SET_ROOM', value);
       }
     },
     startDay: {
