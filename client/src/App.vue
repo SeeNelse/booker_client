@@ -2,14 +2,14 @@
   <div id="app">
     <b-navbar toggleable="lg" type="dark" variant="info">
       <b-container>
-        <b-navbar-brand href="#">Boardroom Booker</b-navbar-brand>
+
+        <router-link class="navbar-brand" to='/'>Boardroom Booker</router-link>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav>
-            <b-nav-item href="#">Admin panel</b-nav-item>
-            <b-nav-item href="#">Link</b-nav-item>
+            <router-link v-if='this.userRole === 1' class="nav-link" to='/admin-panel'>Admin panel</router-link>
           </b-navbar-nav>
 
           <b-navbar-nav class="ml-auto">
@@ -161,6 +161,7 @@ export default {
       },
       signUpSuccess: false,
       logInSuccess: false,
+      userRole: null,
     }
   },
   created() {
@@ -176,6 +177,9 @@ export default {
     // } else {
       // localStorage.setItem('bookerCurrentUser', JSON.stringify(''));
     // }
+  },
+  mounted() {
+    this.userRole = store.state.userInfo.role; // устанавливаем роль, чтобы проверить роль юзера
   },
   methods: {
     signUpSubmit(event) {
@@ -261,7 +265,7 @@ export default {
       } else {
         return false;
       }
-    }
+    },
   },
   computed: {
     userInfo: {
