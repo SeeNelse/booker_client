@@ -47,7 +47,7 @@ module.exports = class Auth {
 
       return bcrypt.hash(userDataFromDB[0].user_name+userDataFromDB[0].user_email, saltRounds).then(hash => {
         AuthDB.setLogInToken(userData, hash);
-        return {name: userDataFromDB[0].user_name, token: hash, logInTime: userData.logInTime, userId: userDataFromDB[0].user_id, role: userDataFromDB[0].role_id};
+        return {name: userDataFromDB[0].user_name, token: hash, logInTime: userData.logInTime, userId: userDataFromDB[0].user_id, role: userDataFromDB[0].role_id, status: userDataFromDB[0].status};
       });
 
     })();

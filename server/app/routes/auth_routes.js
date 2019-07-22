@@ -32,7 +32,7 @@ module.exports = function(app) {
       });
   });
 
-  app.post('/api/user/login/:format?', (request, response) => {
+  app.put('/api/user/login/:format?', (request, response) => {
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 

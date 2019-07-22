@@ -1,6 +1,6 @@
 <template>
   <b-row class='mt-5'>
-    <AdminPanelComponent :tableItems='tableItems'/>
+    <AdminPanelComponent :tableItems='tableItems' :getUsersList='getUsersList'/>
   </b-row>
 </template>
 
@@ -24,22 +24,20 @@ export default {
     if (store.state.userInfo.role !== 1) {
       this.$router.push('/')
     }
-    axios.get(`${serverUrl}/api/user/list`)
-      .then(response => {
-        this.dataToTable(response);
-      });
+    this.getUsersList();
   },
   methods: {
-    dataToTable(array) {
-      let result = [];
-      array.data.forEach(user => {
-        result.push({Id: user.user_id, Name: user.user_name, Email: user.user_email, Role: user.role_name, Status: user.status});
+    getUsersList() {
+      axios.get(`${serverUrl}/api/user/list`)
+      .then(response => {
+        let result = [];
+        response.data.forEach(user => {
+          result.push({Id: user.user_id, Name: user.user_name, Email: user.user_email, Role: user.role_name, Status: user.status});
+        });
+        this.tableItems = result;
       });
-      this.tableItems = result;
     }
   },
-  computed: {
-  }
 }
 </script>
 

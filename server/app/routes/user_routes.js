@@ -26,4 +26,20 @@ module.exports = function(app) {
       });
   });
 
+  app.post('/api/user/block/:format?', (request, response) => {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    let result = User.blockUser(request.body);
+    result
+      .then(ViewResult => View.getData(ViewResult, request.params.format))
+      .then(result => {
+        if (result.serverStatus === 2) {
+          response.status(HttpStatus.OK).send(result)
+        } else {
+          response.status(HttpStatus.NOT_FOUND).send(View.getData(Errors.notFound(), request.params.format))
+        }
+      });
+  });
+
 }

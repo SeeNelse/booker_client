@@ -134,6 +134,10 @@ export default {
 
     // вызов поп-апа "новый ивент"
     modalNewEventHandler(day) {
+      console.log(store.state.userInfo)
+      if (!store.state.userInfo.status || store.state.userInfo.status === 'not_active') {
+        return false;
+      }
       this.dayOnClick = day;
       let eventDate = this.currentDate().replace('-', '').replace('-', '');
 

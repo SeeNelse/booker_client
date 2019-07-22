@@ -17,4 +17,12 @@ module.exports = class UserDB {
     return sendQuery(query);
   }
 
+  blockUser(user) {
+    let query = `
+      UPDATE booker_users 
+      SET status = '${user.status === 'active' ? 'not_active' : 'active'}' 
+      WHERE user_id = ${user.id};`;
+    return sendQuery(query);
+  }
+
 }

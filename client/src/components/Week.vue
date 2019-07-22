@@ -20,9 +20,6 @@ import Day from './Day';
       Day
     },
     props: ['week', 'modalNewEventHandler', 'windowEventHandler', 'selectRoomsValue'],
-    created() {
-      // console.log('here', this.eventForThisMonth());
-    }
   }
 </script>
 

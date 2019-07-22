@@ -158,7 +158,7 @@ export default {
       },
       signUpSuccess: false,
       logInSuccess: false,
-      userRole: null,
+      // userRole: null,
     }
   },
   created() {
@@ -166,17 +166,14 @@ export default {
     if (!storage || !storage.logInTime) {
       return false;
     }
-    // let currentMs = new Date().getTime();
-    // var msToMinCurrent = (currentMs / (1000 * 60)).toFixed(0);
-    // var msToMinStorage = (storage.logInTime / (1000 * 60)).toFixed(0)
-    // if (+msToMinCurrent - +msToMinStorage <= 20) {
+    let currentMs = new Date().getTime();
+    var msToMinCurrent = (currentMs / (1000 * 60)).toFixed(0);
+    var msToMinStorage = (storage.logInTime / (1000 * 60)).toFixed(0)
+    if (+msToMinCurrent - +msToMinStorage <= 20) {
       this.userInfo = storage;
-    // } else {
-      // localStorage.setItem('bookerCurrentUser', JSON.stringify(''));
-    // }
-  },
-  mounted() {
-    this.userRole = store.state.userInfo.role; // устанавливаем роль, чтобы проверить роль юзера
+    } else {
+      localStorage.setItem('bookerCurrentUser', JSON.stringify(''));
+    }
   },
   methods: {
     signUpSubmit(event) {
@@ -226,7 +223,7 @@ export default {
       }
 
       const logInToAPI = JSON.stringify(this.logIn);
-      axios.post(`${serverUrl}/api/user/login`, logInToAPI)
+      axios.put(`${serverUrl}/api/user/login`, logInToAPI)
         .then((response) => {
           if (response.status === 200) {
             this.errors.email = false;
@@ -265,6 +262,9 @@ export default {
     },
   },
   computed: {
+    userRole() { // устанавливаем роль, чтобы проверить роль юзера
+      return store.state.userInfo.role;
+    },
     userInfo: {
       get () {
         return store.state.userInfo

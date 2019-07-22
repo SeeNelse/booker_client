@@ -157,7 +157,7 @@ module.exports = class DataBase {
       }
 
       // Забираем последний айди для вычисления айди рекурентов
-      let lastIdQuery = "SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'booker' AND TABLE_NAME = 'booker_event'";
+      let lastIdQuery = "SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'user8' AND TABLE_NAME = 'booker_event'";
       let currentId = await sendQuery(lastIdQuery);
       currentId = currentId[0]['AUTO_INCREMENT'];
       let parentId = currentId;
