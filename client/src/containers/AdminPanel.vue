@@ -1,51 +1,44 @@
 <template>
   <b-row class='mt-5'>
-    <b-table striped hover :tableItems="tableItems" :fields="fields">
-      
-      <template slot="Block?" slot-scope="row">
-        <b-button variant="info">Block!</b-button>
-      </template>
-
-    </b-table>
+    <AdminPanelComponent :tableItems='tableItems'/>
   </b-row>
 </template>
 
 <script>
 import axios from 'axios';
 import serverUrl from '@/config';
+import store from '@/Store';
+import AdminPanelComponent from '@/components/AdminPanelComponent';
 
 export default {
   name: 'AdminPanel',
+  components: {
+    AdminPanelComponent
+  },
   data() {
     return {
-      fields: ['Name', 'Id', 'Email', 'Role', 'Status', 'Block?'],
       tableItems: []
     }
   },
-  beforeCreate() {
-    // axios.get(`${serverUrl}/api/user/list`)
-    //   .then(response => {
-    //     this.generateItemsForTable(response.data);
-    //   });
-
+  created() {
+    if (store.state.userInfo.role !== 1) {
+      this.$router.push('/')
+    }
     axios.get(`${serverUrl}/api/user/list`)
       .then(response => {
-        let result = [];
-        response.data.forEach(user => {
-          result.push({ Name: user.user_name, Id: user.user_id, Email: user.user_email, Role: user.role_name, Status: user.status});
-        });
-        this.tableItems = result;
-        console.log(this.tableItems);
+        this.dataToTable(response);
       });
   },
   methods: {
-    // generateItemsForTable(usersArray) {
-    //   let result = [];
-    //   usersArray.forEach(user => {
-    //     result.push({ Name: user.user_name, Id: user.user_id, Email: user.user_email, Role: user.role_name, Status: user.status});
-    //   });
-    //   this.tableItems = result;
-    // }
+    dataToTable(array) {
+      let result = [];
+      array.data.forEach(user => {
+        result.push({Id: user.user_id, Name: user.user_name, Email: user.user_email, Role: user.role_name, Status: user.status});
+      });
+      this.tableItems = result;
+    }
+  },
+  computed: {
   }
 }
 </script>

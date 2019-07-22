@@ -8,9 +8,6 @@
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
         <b-collapse id="nav-collapse" is-nav>
-          <b-navbar-nav>
-            <router-link v-if='this.userRole === 1' class="nav-link" to='/admin-panel'>Admin panel</router-link>
-          </b-navbar-nav>
 
           <b-navbar-nav class="ml-auto">
 
@@ -20,7 +17,7 @@
               <b-dropdown-item v-if='!tokenCheck()' v-b-modal.sign-up>Sign Up</b-dropdown-item>
               <b-dropdown-item v-if='!tokenCheck()' v-b-modal.log-in>Log In</b-dropdown-item>
 
-              <b-dropdown-item v-if='tokenCheck()'>Events?</b-dropdown-item>
+              <router-link v-if='this.userRole === 1' class="dropdown-item" to='/admin-panel'>Admin panel</router-link>
               <b-dropdown-item v-if='tokenCheck()' v-on:click='logOut()'>Log Out</b-dropdown-item>
             </b-nav-item-dropdown>
           </b-navbar-nav>

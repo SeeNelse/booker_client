@@ -16,7 +16,7 @@ export default new VueRouter({
     {
       path: '/admin-panel',
       name: 'AdminPanel',
-      component: AdminPanel
+      component: AdminPanel,
     },
   ]
 });
