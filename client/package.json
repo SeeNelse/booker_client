@@ -16,7 +16,7 @@
     "bootstrap-vue": "^2.0.0-rc.25",
     "buefy": "^0.7.10",
     "core-js": "^2.6.5",
-    "luxon": "^1.17.1",
+    "luxon": "^2.5.2",
     "vue": "^2.6.10",
     "vue-custom-scrollbar": "^1.1.0",
     "vue-datetime": "^1.0.0-beta.10",
